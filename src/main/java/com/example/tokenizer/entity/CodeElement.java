@@ -1,4 +1,4 @@
-package com.example.tokenizer;
+package com.example.tokenizer.entity;
 
 import lombok.Getter;
 import lombok.Setter;

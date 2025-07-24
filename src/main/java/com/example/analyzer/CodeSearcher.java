@@ -1,6 +1,6 @@
 package com.example.analyzer;
 
-import com.example.tokenizer.TokenizedCodeElement;
+import com.example.tokenizer.entity.TokenizedCodeElement;
 import lombok.extern.java.Log;
 
 import java.util.HashSet;

@@ -5,7 +5,7 @@ import com.example.analyzer.GitRepositoryAnalyzer;
 import com.example.analyzer.PromptAnalyzer;
 import com.example.tokenizer.CodeElementParser;
 import com.example.tokenizer.CodeTokenizer;
-import com.example.tokenizer.TokenizedCodeElement;
+import com.example.tokenizer.entity.TokenizedCodeElement;
 import lombok.extern.java.Log;
 
 import java.io.IOException;

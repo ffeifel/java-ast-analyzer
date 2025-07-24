@@ -1,5 +1,6 @@
-package com.example.tokenizer;
+package com.example.tokenizer.entity;
 
+import com.example.tokenizer.CodeTokenizer;
 import lombok.Getter;
 
 import java.util.HashSet;

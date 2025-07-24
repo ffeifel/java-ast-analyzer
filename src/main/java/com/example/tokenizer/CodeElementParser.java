@@ -1,5 +1,7 @@
 package com.example.tokenizer;
 
+import com.example.tokenizer.entity.CodeElement;
+import com.example.tokenizer.entity.JavaFileAnalysis;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

@@ -1,4 +1,4 @@
-package com.example.tokenizer;
+package com.example.tokenizer.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -48,17 +48,4 @@ public class JavaFileAnalysis {
 
     @JsonProperty("methodSignatures")
     private List<String> methodSignatures;
-
-    // Getter methods for new fields
-    public List<String> getExtendsClasses() {
-        return extendsClasses;
-    }
-
-    public List<String> getImplementsInterfaces() {
-        return implementsInterfaces;
-    }
-
-    public List<String> getMethodSignatures() {
-        return methodSignatures;
-    }
 }

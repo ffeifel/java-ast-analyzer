@@ -1,8 +1,8 @@
 package com.example;
 
 import com.example.analyzer.CodeSearcher.ScoredCodeElement;
-import com.example.tokenizer.CodeElement;
-import com.example.tokenizer.TokenizedCodeElement;
+import com.example.tokenizer.entity.CodeElement;
+import com.example.tokenizer.entity.TokenizedCodeElement;
 import lombok.extern.java.Log;
 
 import java.util.List;
@@ -33,14 +33,14 @@ public class ContextGenerator {
             CodeElement original = tokenized.getOriginalCodeElement();
 
             // Class header with file path
-            context.append(String.format("%d. %s (%.2f)\n", 
-                i + 1, 
-                original.getClassName() != null ? original.getClassName() : "Unknown",
-                scored.score()));
-            
+            context.append(String.format("%d. %s (%.2f)\n",
+                    i + 1,
+                    original.getClassName() != null ? original.getClassName() : "Unknown",
+                    scored.score()));
+
             context.append(String.format("   File: %s/%s.java\n",
-                original.getPackageName() != null ? original.getPackageName().replace(".", "/") : "",
-                original.getClassName() != null ? original.getClassName() : "Unknown"));
+                    original.getPackageName() != null ? original.getPackageName().replace(".", "/") : "",
+                    original.getClassName() != null ? original.getClassName() : "Unknown"));
 
             // Add class relationships
             if (original.getExtendsClass() != null && !original.getExtendsClass().isEmpty()) {
