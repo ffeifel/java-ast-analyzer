@@ -58,12 +58,14 @@ class TreeWalkerTest {
     void shouldExtractMethodSignatures() throws IOException {
         // Given
         String javaCode =
-                "package com.example.test;\n\n" +
-                        "public class MethodClass {\n" +
-                        "    public void testMethod() {}\n" +
-                        "    private int calculateValue(String input, int factor) { return 0; }\n" +
-                        "    protected static String formatData(Object data) { return \"\"; }\n" +
-                        "}";
+                """
+                        package com.example.test;
+                        
+                        public class MethodClass {
+                            public void testMethod() {}
+                            private int calculateValue(String input, int factor) { return 0; }
+                            protected static String formatData(Object data) { return ""; }
+                        }""";
         Path javaFile = createTempJavaFile("MethodClass.java", javaCode);
         TreeWalker treeWalker = new TreeWalker(javaFile.toString());
 
@@ -86,12 +88,14 @@ class TreeWalkerTest {
     void shouldExtractConstructorSignatures() throws IOException {
         // Given
         String javaCode =
-                "package com.example.test;\n\n" +
-                        "public class ConstructorClass {\n" +
-                        "    public ConstructorClass() {}\n" +
-                        "    private ConstructorClass(String name) {}\n" +
-                        "    protected ConstructorClass(int id, String description) {}\n" +
-                        "}";
+                """
+                        package com.example.test;
+                        
+                        public class ConstructorClass {
+                            public ConstructorClass() {}
+                            private ConstructorClass(String name) {}
+                            protected ConstructorClass(int id, String description) {}
+                        }""";
         Path javaFile = createTempJavaFile("ConstructorClass.java", javaCode);
         TreeWalker treeWalker = new TreeWalker(javaFile.toString());
 
@@ -114,12 +118,15 @@ class TreeWalkerTest {
     void shouldExtractImportStatements() throws IOException {
         // Given
         String javaCode =
-                "package com.example.test;\n\n" +
-                        "import java.util.List;\n" +
-                        "import java.util.Map;\n" +
-                        "import com.example.SomeClass;\n" +
-                        "import static java.util.Collections.emptyList;\n\n" +
-                        "public class ImportClass { }";
+                """
+                        package com.example.test;
+                        
+                        import java.util.List;
+                        import java.util.Map;
+                        import com.example.SomeClass;
+                        import static java.util.Collections.emptyList;
+                        
+                        public class ImportClass { }""";
         Path javaFile = createTempJavaFile("ImportClass.java", javaCode);
         TreeWalker treeWalker = new TreeWalker(javaFile.toString());
 
@@ -159,11 +166,14 @@ class TreeWalkerTest {
     void shouldHandleFileWithMultipleClasses() throws IOException {
         // Given
         String javaCode =
-                "package com.example.test;\n\n" +
-                        "public class MainClass {\n" +
-                        "    private class InnerClass {}\n" +
-                        "}\n\n" +
-                        "class SecondaryClass {}";
+                """
+                        package com.example.test;
+                        
+                        public class MainClass {
+                            private class InnerClass {}
+                        }
+                        
+                        class SecondaryClass {}""";
         Path javaFile = createTempJavaFile("MainClass.java", javaCode);
         TreeWalker treeWalker = new TreeWalker(javaFile.toString());
 
@@ -230,33 +240,42 @@ class TreeWalkerTest {
     void shouldHandleComplexJavaFile() throws IOException {
         // Given
         String complexCode =
-                "package com.example.complex;\n\n" +
-                        "import java.util.*;\n" +
-                        "import java.io.IOException;\n" +
-                        "import static java.lang.Math.*;\n\n" +
-                        "public class ComplexClass {\n" +
-                        "    private final String name;\n" +
-                        "    private int count;\n\n" +
-                        "    public ComplexClass() {\n" +
-                        "        this(\"default\");\n" +
-                        "    }\n\n" +
-                        "    public ComplexClass(String name) {\n" +
-                        "        this.name = name;\n" +
-                        "        this.count = 0;\n" +
-                        "    }\n\n" +
-                        "    public void incrementCount() {\n" +
-                        "        count++;\n" +
-                        "    }\n\n" +
-                        "    public int getCount() {\n" +
-                        "        return count;\n" +
-                        "    }\n\n" +
-                        "    public String getName() {\n" +
-                        "        return name;\n" +
-                        "    }\n\n" +
-                        "    public double calculateValue(double input) {\n" +
-                        "        return sqrt(input) * PI;\n" +
-                        "    }\n" +
-                        "}";
+                """
+                        package com.example.complex;
+                        
+                        import java.util.*;
+                        import java.io.IOException;
+                        import static java.lang.Math.*;
+                        
+                        public class ComplexClass {
+                            private final String name;
+                            private int count;
+                        
+                            public ComplexClass() {
+                                this("default");
+                            }
+                        
+                            public ComplexClass(String name) {
+                                this.name = name;
+                                this.count = 0;
+                            }
+                        
+                            public void incrementCount() {
+                                count++;
+                            }
+                        
+                            public int getCount() {
+                                return count;
+                            }
+                        
+                            public String getName() {
+                                return name;
+                            }
+                        
+                            public double calculateValue(double input) {
+                                return sqrt(input) * PI;
+                            }
+                        }""";
         Path complexFile = createTempJavaFile("ComplexClass.java", complexCode);
         TreeWalker treeWalker = new TreeWalker(complexFile.toString());
 
