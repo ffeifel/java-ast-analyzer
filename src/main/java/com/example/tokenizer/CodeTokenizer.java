@@ -2,6 +2,7 @@ package com.example.tokenizer;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class CodeTokenizer {
@@ -12,10 +13,23 @@ public class CodeTokenizer {
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("([a-zA-Z])([0-9])|([0-9])([a-zA-Z])");
     private static final Pattern SPECIAL_CHARS_PATTERN = Pattern.compile("[^a-zA-Z0-9]+");
+    
+    // Cache for tokenization results
+    private final ConcurrentHashMap<String, Set<String>> tokenCache = new ConcurrentHashMap<>();
+    
+    // Pre-compiled regex results cache
+    private final ConcurrentHashMap<String, String[]> separatorCache = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> camelCaseCache = new ConcurrentHashMap<>();
 
     public Set<String> tokenize(String text) {
         if (text == null || text.isEmpty()) {
             return new HashSet<>();
+        }
+
+        // Check cache first
+        Set<String> cached = tokenCache.get(text);
+        if (cached != null) {
+            return new HashSet<>(cached); // Return copy to avoid modification
         }
 
         Set<String> tokens = new HashSet<>();
@@ -26,11 +40,13 @@ public class CodeTokenizer {
         addTokensFromAcronyms(text, tokens);
         addSubstrings(text, tokens);
 
+        // Cache the result
+        tokenCache.put(text, new HashSet<>(tokens));
         return tokens;
     }
 
     private void addTokensFromSeparators(String text, Set<String> tokens) {
-        String[] parts = SEPARATOR_PATTERN.split(text);
+        String[] parts = separatorCache.computeIfAbsent(text, SEPARATOR_PATTERN::split);
         for (String part : parts) {
             if (part.length() > 1) {
                 tokens.add(part.toLowerCase());
@@ -39,8 +55,10 @@ public class CodeTokenizer {
     }
 
     private void addTokensFromCamelCase(String text, Set<String> tokens) {
-        String processed = CAMEL_CASE_PATTERN1.matcher(text).replaceAll("$1 $2");
-        processed = CAMEL_CASE_PATTERN2.matcher(processed).replaceAll("$1 $2");
+        String processed = camelCaseCache.computeIfAbsent(text, t -> {
+            String temp = CAMEL_CASE_PATTERN1.matcher(t).replaceAll("$1 $2");
+            return CAMEL_CASE_PATTERN2.matcher(temp).replaceAll("$1 $2");
+        });
 
         String[] parts = WHITESPACE_PATTERN.split(processed);
         for (String part : parts) {

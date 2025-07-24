@@ -10,10 +10,12 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
 /**
@@ -55,6 +57,19 @@ public class GitRepositoryAnalyzer {
     private static final String RELATIVE_PATH = "relativePath";
 
     private final List<Path> javaFilePaths = new ArrayList<>();
+    
+    // Cache for file analysis results
+    private final Map<String, CachedAnalysis> analysisCache = new ConcurrentHashMap<>();
+    
+    private static class CachedAnalysis {
+        final Map<String, List<String>> analysis;
+        final FileTime lastModified;
+        
+        CachedAnalysis(Map<String, List<String>> analysis, FileTime lastModified) {
+            this.analysis = analysis;
+            this.lastModified = lastModified;
+        }
+    }
 
     /**
      * Parses a Git repository and generates JSON files containing its structure and Java file analysis.
@@ -229,10 +244,12 @@ public class GitRepositoryAnalyzer {
 
     /**
      * Creates a map containing analysis information for a single Java file.
+     * Now includes caching to avoid re-analyzing unchanged files.
      * <p>
      * This method:
      * <ul>
-     *   <li>Uses TreeWalker to analyze the Java source code</li>
+     *   <li>Checks cache first based on file modification time</li>
+     *   <li>Uses TreeWalker to analyze the Java source code if not cached</li>
      *   <li>Adds file path, name, and relative path from repository root</li>
      *   <li>Incorporates the analysis results from TreeWalker</li>
      * </ul>
@@ -243,12 +260,36 @@ public class GitRepositoryAnalyzer {
      */
     private Map<String, Object> getStringObjectMap(final Path root, final Path javaFilePath) {
         final Path normalizedPath = javaFilePath.normalize();
+        final String pathKey = normalizedPath.toString();
 
-        final TreeWalker walker = new TreeWalker(normalizedPath.toString());
-        final Map<String, List<String>> analysis = walker.analyzeJavaFile();
+        Map<String, List<String>> analysis;
+        
+        try {
+            FileTime currentModified = Files.getLastModifiedTime(normalizedPath);
+            CachedAnalysis cached = analysisCache.get(pathKey);
+            
+            // Check if we have a valid cached result
+            if (cached != null && cached.lastModified.equals(currentModified)) {
+                log.log(Level.FINE, "Using cached analysis for: " + pathKey);
+                analysis = cached.analysis;
+            } else {
+                // Analyze the file and cache the result
+                log.log(Level.FINE, "Analyzing file: " + pathKey);
+                final TreeWalker walker = new TreeWalker(pathKey);
+                analysis = walker.analyzeJavaFile();
+                
+                // Cache the result
+                analysisCache.put(pathKey, new CachedAnalysis(analysis, currentModified));
+            }
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Error getting file modification time for: " + pathKey, e);
+            // Fallback to direct analysis without caching
+            final TreeWalker walker = new TreeWalker(pathKey);
+            analysis = walker.analyzeJavaFile();
+        }
 
         final Map<String, Object> fileEntry = new HashMap<>();
-        fileEntry.put(FILE_PATH, normalizedPath.toString());
+        fileEntry.put(FILE_PATH, pathKey);
         fileEntry.put(FILE_NAME, normalizedPath.getFileName().toString());
 
         // Add relative path from the git repo root
@@ -257,7 +298,7 @@ public class GitRepositoryAnalyzer {
             fileEntry.put(RELATIVE_PATH, relativePath.toString());
         } catch (IllegalArgumentException e) {
             // If paths can't be relativized
-            fileEntry.put(RELATIVE_PATH, normalizedPath.toString());
+            fileEntry.put(RELATIVE_PATH, pathKey);
         }
 
         fileEntry.putAll(analysis);

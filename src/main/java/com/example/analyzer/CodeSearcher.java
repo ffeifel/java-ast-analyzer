@@ -3,14 +3,15 @@ package com.example.analyzer;
 import com.example.tokenizer.entity.TokenizedCodeElement;
 import lombok.extern.java.Log;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 @Log
 public class CodeSearcher {
+    
+    private final InvertedIndex invertedIndex = new InvertedIndex();
+    private boolean indexBuilt = false;
 
     /**
      * Searches for code elements that match the given prompt tokens
@@ -27,15 +28,47 @@ public class CodeSearcher {
             return List.of();
         }
 
+        // Build index if not already built
+        if (!indexBuilt) {
+            invertedIndex.buildIndex(codeElements);
+            indexBuilt = true;
+        }
+
         log.log(Level.FINE, "Searching " + codeElements.size() + " code elements for tokens: " + promptTokens);
         log.info("Searching " + codeElements.size() + " code elements for tokens");
 
-        List<ScoredCodeElement> scoredElements = codeElements.stream()
-                .map(element -> new ScoredCodeElement(element, calculateRelevanceScore(promptTokens, element)))
-                .filter(scored -> scored.score() > 0.15)
-                .sorted((a, b) -> Double.compare(b.score(), a.score()))
-                .limit(maxResults)
-                .collect(Collectors.toList());
+        // Use inverted index to get candidates
+        Set<TokenizedCodeElement> candidates = invertedIndex.getCandidates(promptTokens);
+        log.log(Level.INFO, "Inverted index reduced search space from " + codeElements.size() + " to " + candidates.size() + " candidates");
+
+        // Use priority queue for early termination
+        PriorityQueue<ScoredCodeElement> topResults = new PriorityQueue<>(
+            maxResults + 1, 
+            Comparator.comparingDouble(ScoredCodeElement::score)
+        );
+
+        double minScoreThreshold = 0.15;
+        
+        for (TokenizedCodeElement element : candidates) {
+            double score = calculateRelevanceScore(promptTokens, element);
+            
+            if (score > minScoreThreshold) {
+                topResults.offer(new ScoredCodeElement(element, score));
+                
+                // Early termination: keep only top maxResults
+                if (topResults.size() > maxResults) {
+                    topResults.poll(); // Remove lowest score
+                    // Update threshold to the new minimum
+                    if (!topResults.isEmpty()) {
+                        minScoreThreshold = Math.max(minScoreThreshold, topResults.peek().score());
+                    }
+                }
+            }
+        }
+
+        // Convert to list and sort in descending order
+        List<ScoredCodeElement> scoredElements = new ArrayList<>(topResults);
+        scoredElements.sort((a, b) -> Double.compare(b.score(), a.score()));
 
         log.log(Level.INFO, "Found " + scoredElements.size() + " matching elements");
 
@@ -44,6 +77,7 @@ public class CodeSearcher {
 
     /**
      * Calculates relevance score between prompt tokens and a code element
+     * Now includes TF-IDF weighting for better relevance
      *
      * @param promptTokens tokens from the user prompt
      * @param codeElement  tokenized code element
@@ -52,13 +86,44 @@ public class CodeSearcher {
     private double calculateRelevanceScore(Set<String> promptTokens, TokenizedCodeElement codeElement) {
         double score = 0.0;
 
-        // Weight different token types differently
-        score += calculateTokenOverlap(promptTokens, codeElement.getClassTokens()) * 3.0;
-        score += calculateTokenOverlap(promptTokens, codeElement.getMethodTokens()) * 2.0;
-        score += calculateTokenOverlap(promptTokens, codeElement.getPackageTokens());
-        score += calculateTokenOverlap(promptTokens, codeElement.getImportTokens()) * 0.5;
+        // Weight different token types differently with TF-IDF
+        score += calculateTfIdfScore(promptTokens, codeElement.getClassTokens()) * 3.0;
+        score += calculateTfIdfScore(promptTokens, codeElement.getMethodTokens()) * 2.0;
+        score += calculateTfIdfScore(promptTokens, codeElement.getPackageTokens()) * 1.0;
+        score += calculateTfIdfScore(promptTokens, codeElement.getImportTokens()) * 0.5;
 
         return score;
+    }
+    
+    /**
+     * Calculates TF-IDF weighted score for token overlap
+     */
+    private double calculateTfIdfScore(Set<String> promptTokens, Set<String> codeTokens) {
+        if (promptTokens.isEmpty() || codeTokens.isEmpty()) {
+            return 0.0;
+        }
+
+        Set<String> intersection = new HashSet<>(promptTokens);
+        intersection.retainAll(codeTokens);
+        
+        if (intersection.isEmpty()) {
+            return 0.0;
+        }
+
+        double tfIdfScore = 0.0;
+        for (String token : intersection) {
+            // Term frequency in this context is binary (present or not)
+            double tf = 1.0;
+            // Get inverse document frequency from index
+            double idf = invertedIndex.getTokenIDF(token);
+            tfIdfScore += tf * idf;
+        }
+
+        // Normalize by the size of the union to get a ratio
+        Set<String> union = new HashSet<>(promptTokens);
+        union.addAll(codeTokens);
+        
+        return tfIdfScore / union.size();
     }
 
     /**
