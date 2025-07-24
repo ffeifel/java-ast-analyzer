@@ -1,5 +1,7 @@
 package com.example;
 
+import com.example.analyzer.GitRepositoryAnalyzer;
+import com.example.analyzer.TreeWalker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

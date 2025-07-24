@@ -51,11 +51,6 @@ public class CodeElement {
             this.returnType = returnType;
             this.parameters = parameters;
         }
-
-
-        public void addParameter(String parameter) {
-            this.parameters.add(parameter);
-        }
     }
 
 }

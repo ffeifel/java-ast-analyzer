@@ -1,5 +1,8 @@
 package com.example;
 
+import com.example.analyzer.CodeSearcher;
+import com.example.analyzer.GitRepositoryAnalyzer;
+import com.example.analyzer.PromptAnalyzer;
 import com.example.tokenizer.CodeElementParser;
 import com.example.tokenizer.CodeTokenizer;
 import com.example.tokenizer.TokenizedCodeElement;
@@ -19,11 +22,10 @@ public class Main {
         if (args.length > 0) {
             gitRepoPath = args[0];
         } else {
-            // Default path if no argument is provided
             gitRepoPath = ".";
             log.log(Level.INFO, "No path provided. Using default: " + gitRepoPath);
         }
-        
+
         if (args.length > 1) {
             prompt = args[1];
         }
@@ -52,22 +54,19 @@ public class Main {
             throw new RuntimeException(e);
         }
     }
-    
+
     private static void performSearch(String prompt, List<TokenizedCodeElement> tokenizedElements) {
         log.log(Level.INFO, "Performing search for prompt: " + prompt);
-        
-        // Analyze the prompt
+
         PromptAnalyzer promptAnalyzer = new PromptAnalyzer();
         var promptTokens = promptAnalyzer.analyzePrompt(prompt);
-        
-        // Search for matching code elements
+
         CodeSearcher searcher = new CodeSearcher();
-        var searchResults = searcher.search(promptTokens, tokenizedElements, 10); // Top 10 results
-        
-        // Generate context for LLM
+        var searchResults = searcher.search(promptTokens, tokenizedElements, 10);
+
         ContextGenerator contextGenerator = new ContextGenerator();
         String context = contextGenerator.generateContext(prompt, searchResults);
-        
+
         // Output the context
         System.out.println("\n" + "=".repeat(80));
         System.out.println("GENERATED CONTEXT FOR LLM:");

@@ -1,16 +1,19 @@
 package com.example.tokenizer;
 
+import lombok.Getter;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Getter
 public class TokenizedCodeElement {
     private final CodeElement originalCodeElement;
-    private Set<String> classTokens;
-    private Set<String> methodTokens;
-    private Set<String> packageTokens;
-    private Set<String> importTokens;
-    private Set<String> allTokens;
+    private final Set<String> classTokens;
+    private final Set<String> methodTokens;
+    private final Set<String> packageTokens;
+    private final Set<String> importTokens;
+    private final Set<String> allTokens;
 
     public TokenizedCodeElement(CodeElement codeElement, CodeTokenizer tokenizer) {
         this.originalCodeElement = codeElement;
@@ -36,28 +39,4 @@ public class TokenizedCodeElement {
         return parts.length > 0 ? parts[parts.length - 1] : importStmt;
     }
 
-    // Getter methods
-    public CodeElement getOriginalCodeElement() {
-        return originalCodeElement;
-    }
-
-    public Set<String> getClassTokens() {
-        return classTokens;
-    }
-
-    public Set<String> getMethodTokens() {
-        return methodTokens;
-    }
-
-    public Set<String> getPackageTokens() {
-        return packageTokens;
-    }
-
-    public Set<String> getImportTokens() {
-        return importTokens;
-    }
-
-    public Set<String> getAllTokens() {
-        return allTokens;
-    }
 }

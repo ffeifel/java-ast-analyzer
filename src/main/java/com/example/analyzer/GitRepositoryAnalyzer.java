@@ -1,4 +1,4 @@
-package com.example;
+package com.example.analyzer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -99,8 +99,7 @@ public class GitRepositoryAnalyzer {
             // Create output files with repo name in the filename
             final File structureFile = new File(outputDir, repoName + "_structure.json");
 
-            final String json = mapper.writeValueAsString(structure);
-            log.log(Level.INFO, "Git project structure in JSON:\n" + json);
+            mapper.writeValueAsString(structure);
             mapper.writeValue(structureFile, structure);
             log.log(Level.INFO, "Project structure written to " + structureFile.getAbsolutePath());
         } catch (IOException e) {

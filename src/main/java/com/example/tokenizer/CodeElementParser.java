@@ -25,7 +25,7 @@ public class CodeElementParser {
         ObjectMapper objectMapper = new ObjectMapper();
         List<JavaFileAnalysis> dtoList = objectMapper.readValue(
                 new File(jsonFilePath),
-                new TypeReference<List<JavaFileAnalysis>>() {
+                new TypeReference<>() {
                 }
         );
 
@@ -62,7 +62,7 @@ public class CodeElementParser {
         if (dto.getExtendsClasses() != null && !dto.getExtendsClasses().isEmpty()) {
             codeElement.setExtendsClass(dto.getExtendsClasses().getFirst());
         }
-        
+
         if (dto.getImplementsInterfaces() != null) {
             codeElement.setImplementsInterfaces(dto.getImplementsInterfaces());
         }
@@ -104,7 +104,7 @@ public class CodeElementParser {
         // Parse signature like "String getName(int id, boolean active)"
         int openParenIndex = methodSignature.indexOf('(');
         int closeParenIndex = methodSignature.lastIndexOf(')');
-        
+
         if (openParenIndex == -1) {
             return new CodeElement.Method(methodSignature); // Fallback
         }
@@ -119,7 +119,7 @@ public class CodeElementParser {
         String[] parts = beforeParams.split("\\s+");
         String methodName;
         String returnType = "void";
-        
+
         if (parts.length >= 2) {
             returnType = parts[parts.length - 2];
             methodName = parts[parts.length - 1];
