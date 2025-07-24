@@ -45,13 +45,18 @@ public class ContextGenerator {
             if (original.getMethods() != null && !original.getMethods().isEmpty()) {
                 context.append("   Methods: ");
                 context.append(original.getMethods().stream()
-                        .limit(6) // Reduced to 6 for better readability
+                        .limit(5) // Reduced to 5 to accommodate longer signatures
                         .map(method -> {
-                            String params = "";
                             if (method.getParameters() != null && !method.getParameters().isEmpty()) {
-                                params = method.getParameters().size() == 1 ? "1 param" : method.getParameters().size() + " params";
+                                String params = String.join(", ", method.getParameters());
+                                // Truncate very long parameter lists
+                                if (params.length() > 50) {
+                                    params = params.substring(0, 47) + "...";
+                                }
+                                return method.getName() + "(" + params + ")";
+                            } else {
+                                return method.getName() + "()";
                             }
-                            return method.getName() + "(" + params + ")";
                         })
                         .reduce((a, b) -> a + ", " + b)
                         .orElse(""));
