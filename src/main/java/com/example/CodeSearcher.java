@@ -31,7 +31,7 @@ public class CodeSearcher {
         
         List<ScoredCodeElement> scoredElements = codeElements.stream()
                 .map(element -> new ScoredCodeElement(element, calculateRelevanceScore(promptTokens, element)))
-                .filter(scored -> scored.getScore() > 0) // Only include elements with some relevance
+                .filter(scored -> scored.getScore() > 0.05) // Only include elements with meaningful relevance
                 .sorted((a, b) -> Double.compare(b.getScore(), a.getScore())) // Sort by score descending
                 .limit(maxResults)
                 .collect(Collectors.toList());
