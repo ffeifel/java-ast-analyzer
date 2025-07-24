@@ -89,44 +89,60 @@ public class TreeWalker {
                     result.put(PACKAGE, List.of(pkg.getNameAsString())));
 
             // Get imports
-            cu.getImports().forEach(importDecl ->
-                    imports.add(importDecl.getNameAsString()));
+            cu.getImports().forEach(importDecl -> {
+                if (importDecl.isStatic()) {
+                    imports.add("static " + importDecl.getNameAsString());
+                } else {
+                    imports.add(importDecl.getNameAsString());
+                }
+            });
 
             // Get class information including inheritance
-            cu.findAll(ClassOrInterfaceDeclaration.class).forEach(classDecl -> {
-                result.put(CLASS_NAME, List.of(classDecl.getNameAsString()));
+            List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
+            if (!classes.isEmpty()) {
+                // Get the first class found
+                ClassOrInterfaceDeclaration firstClass = classes.get(0);
+                result.put(CLASS_NAME, List.of(firstClass.getNameAsString()));
                 
                 // Get extends information
-                classDecl.getExtendedTypes().forEach(extendedType ->
+                firstClass.getExtendedTypes().forEach(extendedType ->
                         result.put(EXTENDS, List.of(extendedType.getNameAsString())));
                 
                 // Get implements information
-                if (!classDecl.getImplementedTypes().isEmpty()) {
-                    List<String> interfaces = classDecl.getImplementedTypes().stream()
+                if (!firstClass.getImplementedTypes().isEmpty()) {
+                    List<String> interfaces = firstClass.getImplementedTypes().stream()
                             .map(impl -> impl.getNameAsString())
                             .collect(Collectors.toList());
                     result.put(IMPLEMENTS, interfaces);
                 }
-            });
+            }
 
             // Get method signatures with return types
             cu.findAll(MethodDeclaration.class).forEach(method -> {
-                methods.add(method.getDeclarationAsString(false, false, false));
-                
-                // Create detailed method signature
+                // Create method signature with parameter names for METHODS
                 String returnType = method.getTypeAsString();
                 String methodName = method.getNameAsString();
                 String params = method.getParameters().stream()
                         .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
                         .collect(Collectors.joining(", "));
                 
-                String signature = returnType + " " + methodName + "(" + params + ")";
-                methodSignatures.add(signature);
+                String methodSignature = returnType + " " + methodName + "(" + params + ")";
+                methods.add(methodSignature);
+                
+                // Create detailed method signature for METHOD_SIGNATURES (same as above for now)
+                methodSignatures.add(methodSignature);
             });
 
             // Get constructor signatures
-            cu.findAll(ConstructorDeclaration.class).forEach(constructor ->
-                    constructors.add(constructor.getDeclarationAsString(false, false, false)));
+            cu.findAll(ConstructorDeclaration.class).forEach(constructor -> {
+                String constructorName = constructor.getNameAsString();
+                String params = constructor.getParameters().stream()
+                        .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
+                        .collect(Collectors.joining(", "));
+                
+                String signature = constructorName + "(" + params + ")";
+                constructors.add(signature);
+            });
 
             if (!imports.isEmpty()) {
                 result.put(IMPORTS, imports);
@@ -142,6 +158,9 @@ public class TreeWalker {
             }
 
         } catch (IOException e) {
+            log.log(Level.WARNING, "Error parsing Java file: " + path, e);
+            result.put("error", List.of("Failed to parse file: " + e.getMessage()));
+        } catch (Exception e) {
             log.log(Level.WARNING, "Error parsing Java file: " + path, e);
             result.put("error", List.of("Failed to parse file: " + e.getMessage()));
         }
