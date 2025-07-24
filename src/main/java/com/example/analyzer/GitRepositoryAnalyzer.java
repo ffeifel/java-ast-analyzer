@@ -124,7 +124,7 @@ public class GitRepositoryAnalyzer {
      * @param path The directory path to process
      * @return A map representing the directory structure, or null for files and skipped directories
      */
-    Map<String, Object> buildSimpleTree(final Path path) {
+    public Map<String, Object> buildSimpleTree(final Path path) {
         final String fileName = path.getFileName().toString();
 
         // Skip .git directory
