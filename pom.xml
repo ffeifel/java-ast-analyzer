@@ -153,6 +153,7 @@
                 <quarkus.native.enabled>true</quarkus.native.enabled>
                 <quarkus.native.container-build>false</quarkus.native.container-build>
                 <quarkus.native.builder-image>graalvm</quarkus.native.builder-image>
+                <quarkus.native.additional-build-args>--initialize-at-build-time=org.slf4j</quarkus.native.additional-build-args>
             </properties>
         </profile>
         <profile>
