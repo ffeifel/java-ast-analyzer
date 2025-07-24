@@ -107,10 +107,3 @@ Relevance is evaluated based on various factors:
 - **Package Tokens**: Weight 1.0
 - **Import Tokens**: Weight 0.5
 
-## License
-
-[Insert license here]
-
-## Contributing
-
-[Insert contribution guidelines here]
