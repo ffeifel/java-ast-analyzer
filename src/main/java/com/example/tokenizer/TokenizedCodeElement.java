@@ -5,6 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class TokenizedCodeElement {
+    private final CodeElement originalCodeElement;
     private Set<String> classTokens;
     private Set<String> methodTokens;
     private Set<String> packageTokens;
@@ -12,6 +13,7 @@ public class TokenizedCodeElement {
     private Set<String> allTokens;
 
     public TokenizedCodeElement(CodeElement codeElement, CodeTokenizer tokenizer) {
+        this.originalCodeElement = codeElement;
 
         this.classTokens = tokenizer.tokenize(codeElement.getClassName());
         this.methodTokens = codeElement.getMethods().stream()
@@ -32,5 +34,30 @@ public class TokenizedCodeElement {
     private String getLastPartOfImport(String importStmt) {
         String[] parts = importStmt.split("\\.");
         return parts.length > 0 ? parts[parts.length - 1] : importStmt;
+    }
+
+    // Getter methods
+    public CodeElement getOriginalCodeElement() {
+        return originalCodeElement;
+    }
+
+    public Set<String> getClassTokens() {
+        return classTokens;
+    }
+
+    public Set<String> getMethodTokens() {
+        return methodTokens;
+    }
+
+    public Set<String> getPackageTokens() {
+        return packageTokens;
+    }
+
+    public Set<String> getImportTokens() {
+        return importTokens;
+    }
+
+    public Set<String> getAllTokens() {
+        return allTokens;
     }
 }
