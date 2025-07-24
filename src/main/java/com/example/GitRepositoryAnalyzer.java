@@ -71,12 +71,12 @@ public class GitRepositoryAnalyzer {
      * @param gitProjectPath The path to the Git repository to analyze
      * @throws RuntimeException If there is an error writing the JSON output files
      */
-    public void parseGitProject(final String gitProjectPath) {
+    public String parseGitProject(final String gitProjectPath) {
         final Path root = Paths.get(gitProjectPath).toAbsolutePath().normalize();
 
         if (!isGitRepo(root)) {
             log.log(Level.INFO, "Not a valid Git repository: " + root);
-            return;
+            return null;
         }
 
         // Get repository name from the path
@@ -108,7 +108,7 @@ public class GitRepositoryAnalyzer {
         }
 
         // Now process all Java files and create a separate json
-        generateJavaFilesAnalysis(root, repoName, outputDir);
+        return generateJavaFilesAnalysis(root, repoName, outputDir);
     }
 
     /**
@@ -193,7 +193,7 @@ public class GitRepositoryAnalyzer {
      * @param repoName  The name of the repository (used for the output filename)
      * @param outputDir The directory where the output JSON file will be written
      */
-    private void generateJavaFilesAnalysis(final Path root, final String repoName, final String outputDir) {
+    private String generateJavaFilesAnalysis(final Path root, final String repoName, final String outputDir) {
         final List<Map<String, Object>> javaFilesAnalysis = new ArrayList<>();
 
         for (Path javaFilePath : javaFilePaths) {
@@ -221,8 +221,10 @@ public class GitRepositoryAnalyzer {
             final File analysisFile = new File(outputDir, repoName + "_java_analysis.json");
             mapper.writeValue(analysisFile, javaFilesAnalysis);
             log.log(Level.INFO, "Java files analysis written to " + analysisFile.getAbsolutePath());
+            return analysisFile.getAbsolutePath();
         } catch (IOException e) {
             log.log(Level.SEVERE, "Error writing Java files analysis", e);
+            return null;
         }
     }
 

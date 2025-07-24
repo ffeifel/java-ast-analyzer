@@ -1,7 +1,11 @@
 package com.example;
 
+import com.example.tokenizer.CodeElementParser;
+import com.example.tokenizer.CodeTokenizer;
+import com.example.tokenizer.TokenizedCodeElement;
 import lombok.extern.java.Log;
 
+import java.io.IOException;
 import java.util.logging.Level;
 
 @Log
@@ -19,7 +23,21 @@ public class Main {
         }
 
         GitRepositoryAnalyzer gitProjectToJson = new GitRepositoryAnalyzer();
-        gitProjectToJson.parseGitProject(gitRepoPath);
+        final String outputDir = gitProjectToJson.parseGitProject(gitRepoPath);
+
+        try {
+            final var codeElements = CodeElementParser.parseFromJson(outputDir);
+
+            final var tokenizedElements = codeElements.stream()
+                    .map(codeElement -> new TokenizedCodeElement(codeElement, new CodeTokenizer()))
+                    .toList();
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 
 }
