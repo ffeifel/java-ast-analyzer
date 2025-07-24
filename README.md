@@ -1,116 +1,116 @@
 # Code Search Tool
 
-Ein Java-basiertes Tool zur Analyse von Git-Repositories und intelligenten Code-Suche.
+A Java-based tool for analyzing Git repositories and intelligent code search.
 
-## Überblick
+## Overview
 
-Dieses Tool analysiert Java-Projekte in Git-Repositories, tokenisiert den Code und ermöglicht es, relevante Code-Elemente basierend auf natürlichsprachlichen Prompts zu finden.
+This tool analyzes Java projects in Git repositories, tokenizes the code, and enables finding relevant code elements based on natural language prompts.
 
 ## Features
 
-- **Git Repository Analyse**: Automatische Erkennung und Analyse von Java-Dateien in Git-Repositories
-- **Code Tokenisierung**: Intelligente Tokenisierung von Java-Code (Klassen, Methoden, Packages, Imports)
-- **Semantische Suche**: Suche nach Code-Elementen basierend auf natürlichsprachlichen Anfragen
-- **Relevanz-Scoring**: Bewertung der Relevanz von Code-Elementen für gegebene Prompts
-- **Kontext-Generierung**: Automatische Generierung von relevantem Kontext für gefundene Code-Elemente
+- **Git Repository Analysis**: Automatic detection and analysis of Java files in Git repositories
+- **Code Tokenization**: Intelligent tokenization of Java code (classes, methods, packages, imports)
+- **Semantic Search**: Search for code elements based on natural language queries
+- **Relevance Scoring**: Evaluation of code element relevance for given prompts
+- **Context Generation**: Automatic generation of relevant context for found code elements
 
-## Verwendung
+## Usage
 
-### Grundlegende Verwendung
+### Basic Usage
 
 ```bash
 java -jar target/code-search-tool.jar [repository-path] [prompt]
 ```
 
-### Parameter
+### Parameters
 
-- `repository-path` (optional): Pfad zum Git-Repository (Standard: aktuelles Verzeichnis)
-- `prompt` (optional): Suchprompt für die Code-Suche
+- `repository-path` (optional): Path to the Git repository (default: current directory)
+- `prompt` (optional): Search prompt for code search
 
-### Beispiele
+### Examples
 
 ```bash
-# Analyse des aktuellen Verzeichnisses
+# Analyze current directory
 java -jar target/code-search-tool.jar
 
-# Analyse eines spezifischen Repositories
+# Analyze a specific repository
 java -jar target/code-search-tool.jar /path/to/repo
 
-# Code-Suche mit Prompt
+# Code search with prompt
 java -jar target/code-search-tool.jar /path/to/repo "find methods that handle user authentication"
 ```
 
 ## Build
 
-### Voraussetzungen
+### Prerequisites
 
-- Java 11 oder höher
-- Maven 3.6 oder höher
+- Java 11 or higher
+- Maven 3.6 or higher
 
-### Kompilierung
+### Compilation
 
 ```bash
 mvn clean compile
 ```
 
-### Tests ausführen
+### Run Tests
 
 ```bash
 mvn test
 ```
 
-### JAR erstellen
+### Create JAR
 
 ```bash
 mvn clean package
 ```
 
-## Architektur
+## Architecture
 
-### Hauptkomponenten
+### Main Components
 
-- **GitRepositoryAnalyzer**: Analysiert Git-Repositories und extrahiert Java-Dateien
-- **TreeWalker**: Parst Java-Dateien und extrahiert strukturelle Informationen
-- **CodeTokenizer**: Tokenisiert Code-Elemente für die Suche
-- **PromptAnalyzer**: Analysiert und tokenisiert Benutzer-Prompts
-- **CodeSearcher**: Führt semantische Suche durch und bewertet Relevanz
-- **ContextGenerator**: Generiert strukturierten Kontext aus Suchergebnissen
+- **GitRepositoryAnalyzer**: Analyzes Git repositories and extracts Java files
+- **TreeWalker**: Parses Java files and extracts structural information
+- **CodeTokenizer**: Tokenizes code elements for search
+- **PromptAnalyzer**: Analyzes and tokenizes user prompts
+- **CodeSearcher**: Performs semantic search and evaluates relevance
+- **ContextGenerator**: Generates structured context from search results
 
 ### Workflow
 
-1. **Repository-Analyse**: Erkennung von Java-Dateien im Git-Repository
-2. **Code-Parsing**: Extraktion von Klassen, Methoden, Imports und anderen Elementen
-3. **Tokenisierung**: Aufbereitung des Codes für die Suche
-4. **Prompt-Analyse**: Verarbeitung der Benutzeranfrage
-5. **Suche**: Matching von Prompt-Tokens mit Code-Elementen
-6. **Scoring**: Bewertung der Relevanz basierend auf verschiedenen Faktoren
-7. **Kontext-Generierung**: Aufbereitung der Ergebnisse
+1. **Repository Analysis**: Detection of Java files in the Git repository
+2. **Code Parsing**: Extraction of classes, methods, imports and other elements
+3. **Tokenization**: Preparation of code for search
+4. **Prompt Analysis**: Processing of user query
+5. **Search**: Matching of prompt tokens with code elements
+6. **Scoring**: Relevance evaluation based on various factors
+7. **Context Generation**: Preparation of results
 
-## Technische Details
+## Technical Details
 
-### Tokenisierung
+### Tokenization
 
-Das Tool verwendet verschiedene Tokenisierungsstrategien:
+The tool uses various tokenization strategies:
 
-- **Separator-basiert**: Trennung an Punkten, Unterstrichen, Bindestrichen
-- **CamelCase**: Aufspaltung von CamelCase-Bezeichnern
-- **Numerische Trennung**: Trennung von Buchstaben und Zahlen
-- **Akronyme**: Erkennung von Großbuchstaben-Sequenzen
-- **Substrings**: Generierung von Teilstrings für fuzzy matching
+- **Separator-based**: Separation at dots, underscores, hyphens
+- **CamelCase**: Splitting of CamelCase identifiers
+- **Numeric Separation**: Separation of letters and numbers
+- **Acronyms**: Recognition of uppercase letter sequences
+- **Substrings**: Generation of substrings for fuzzy matching
 
-### Relevanz-Scoring
+### Relevance Scoring
 
-Die Relevanz wird basierend auf verschiedenen Faktoren bewertet:
+Relevance is evaluated based on various factors:
 
-- **Klassen-Tokens**: Gewichtung 3.0
-- **Methoden-Tokens**: Gewichtung 2.0
-- **Package-Tokens**: Gewichtung 1.0
-- **Import-Tokens**: Gewichtung 0.5
+- **Class Tokens**: Weight 3.0
+- **Method Tokens**: Weight 2.0
+- **Package Tokens**: Weight 1.0
+- **Import Tokens**: Weight 0.5
 
-## Lizenz
+## License
 
-[Lizenz hier einfügen]
+[Insert license here]
 
-## Beitragen
+## Contributing
 
-[Beitragsrichtlinien hier einfügen]
+[Insert contribution guidelines here]
