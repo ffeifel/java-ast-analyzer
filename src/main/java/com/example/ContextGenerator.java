@@ -32,29 +32,38 @@ public class ContextGenerator {
             TokenizedCodeElement tokenized = scored.codeElement();
             CodeElement original = tokenized.getOriginalCodeElement();
 
-            context.append(String.format("%d. %s (%.2f) - %s\n", 
+            // Class header with file path
+            context.append(String.format("%d. %s (%.2f)\n", 
                 i + 1, 
                 original.getClassName() != null ? original.getClassName() : "Unknown",
-                scored.score(),
-                original.getPackageName() != null ? original.getPackageName() : ""));
+                scored.score()));
+            
+            context.append(String.format("   File: %s/%s.java\n",
+                original.getPackageName() != null ? original.getPackageName().replace(".", "/") : "",
+                original.getClassName() != null ? original.getClassName() : "Unknown"));
 
             if (original.getMethods() != null && !original.getMethods().isEmpty()) {
                 context.append("   Methods: ");
                 context.append(original.getMethods().stream()
-                        .limit(8) // Limit to avoid clutter
-                        .map(method -> method.getName() + 
-                            (method.getParameters() != null && !method.getParameters().isEmpty() 
-                                ? "(" + method.getParameters().size() + " params)" 
-                                : "()"))
+                        .limit(6) // Reduced to 6 for better readability
+                        .map(method -> {
+                            String params = "";
+                            if (method.getParameters() != null && !method.getParameters().isEmpty()) {
+                                params = method.getParameters().size() == 1 ? "1 param" : method.getParameters().size() + " params";
+                            }
+                            return method.getName() + "(" + params + ")";
+                        })
                         .reduce((a, b) -> a + ", " + b)
                         .orElse(""));
                 context.append("\n");
             }
 
             if (original.getImports() != null && !original.getImports().isEmpty()) {
-                context.append("   Key imports: ");
+                context.append("   Uses: ");
                 context.append(String.join(", ", original.getImports().stream()
-                        .limit(3) // Reduced from 5 to 3
+                        .filter(imp -> !imp.startsWith("java.lang")) // Filter out basic Java imports
+                        .map(imp -> imp.substring(imp.lastIndexOf('.') + 1)) // Just class names
+                        .limit(4)
                         .toList()));
                 context.append("\n");
             }
