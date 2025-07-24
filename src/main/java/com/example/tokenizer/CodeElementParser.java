@@ -58,11 +58,25 @@ public class CodeElementParser {
             codeElement.setImports(dto.getImports());
         }
 
+        // Set class relationships
+        if (dto.getExtendsClasses() != null && !dto.getExtendsClasses().isEmpty()) {
+            codeElement.setExtendsClass(dto.getExtendsClasses().getFirst());
+        }
+        
+        if (dto.getImplementsInterfaces() != null) {
+            codeElement.setImplementsInterfaces(dto.getImplementsInterfaces());
+        }
+
         // Set methods
         List<CodeElement.Method> methods = new ArrayList<>();
 
-        // Add regular methods
-        if (dto.getMethods() != null) {
+        // Add regular methods with detailed signatures if available
+        if (dto.getMethodSignatures() != null) {
+            for (String methodSignature : dto.getMethodSignatures()) {
+                methods.add(parseMethodSignature(methodSignature));
+            }
+        } else if (dto.getMethods() != null) {
+            // Fallback to simple method names
             for (String methodSignature : dto.getMethods()) {
                 methods.add(new CodeElement.Method(extractMethodName(methodSignature)));
             }
@@ -78,6 +92,51 @@ public class CodeElementParser {
         codeElement.setMethods(methods);
 
         return codeElement;
+    }
+
+    /**
+     * Parses a detailed method signature into a Method object
+     *
+     * @param methodSignature the method signature like "String getName(int id, boolean active)"
+     * @return a Method object with return type, name, and parameters
+     */
+    private static CodeElement.Method parseMethodSignature(String methodSignature) {
+        // Parse signature like "String getName(int id, boolean active)"
+        int openParenIndex = methodSignature.indexOf('(');
+        int closeParenIndex = methodSignature.lastIndexOf(')');
+        
+        if (openParenIndex == -1) {
+            return new CodeElement.Method(methodSignature); // Fallback
+        }
+
+        String beforeParams = methodSignature.substring(0, openParenIndex).trim();
+        String paramsPart = "";
+        if (closeParenIndex > openParenIndex) {
+            paramsPart = methodSignature.substring(openParenIndex + 1, closeParenIndex).trim();
+        }
+
+        // Extract return type and method name
+        String[] parts = beforeParams.split("\\s+");
+        String methodName;
+        String returnType = "void";
+        
+        if (parts.length >= 2) {
+            returnType = parts[parts.length - 2];
+            methodName = parts[parts.length - 1];
+        } else {
+            methodName = parts[parts.length - 1];
+        }
+
+        // Parse parameters
+        List<String> parameters = new ArrayList<>();
+        if (!paramsPart.isEmpty()) {
+            String[] paramArray = paramsPart.split(",");
+            for (String param : paramArray) {
+                parameters.add(param.trim());
+            }
+        }
+
+        return new CodeElement.Method(methodName, returnType, parameters);
     }
 
     /**
