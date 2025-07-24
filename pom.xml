@@ -132,6 +132,7 @@
                                     <mainClass>com.example.Main</mainClass>
                                 </transformer>
                             </transformers>
+                            <finalName>code-search-tool</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -150,6 +151,21 @@
             <properties>
                 <skipITs>false</skipITs>
                 <quarkus.native.enabled>true</quarkus.native.enabled>
+                <quarkus.native.container-build>false</quarkus.native.container-build>
+                <quarkus.native.builder-image>graalvm</quarkus.native.builder-image>
+            </properties>
+        </profile>
+        <profile>
+            <id>native-container</id>
+            <activation>
+                <property>
+                    <name>native-container</name>
+                </property>
+            </activation>
+            <properties>
+                <skipITs>false</skipITs>
+                <quarkus.native.enabled>true</quarkus.native.enabled>
+                <quarkus.native.container-build>true</quarkus.native.container-build>
             </properties>
         </profile>
     </profiles>
