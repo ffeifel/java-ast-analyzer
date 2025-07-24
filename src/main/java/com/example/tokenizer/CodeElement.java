@@ -18,6 +18,8 @@ public class CodeElement {
     private List<Method> methods;
     private String packageName;
     private List<String> imports;
+    private String extendsClass;
+    private List<String> implementsInterfaces;
 
     public CodeElement(String className, List<Method> methods, String packageName, List<String> imports) {
         this.className = className;
@@ -29,6 +31,7 @@ public class CodeElement {
     public CodeElement() {
         this.methods = new ArrayList<>();
         this.imports = new ArrayList<>();
+        this.implementsInterfaces = new ArrayList<>();
     }
 
     @Setter

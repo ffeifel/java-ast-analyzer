@@ -42,6 +42,14 @@ public class ContextGenerator {
                 original.getPackageName() != null ? original.getPackageName().replace(".", "/") : "",
                 original.getClassName() != null ? original.getClassName() : "Unknown"));
 
+            // Add class relationships
+            if (original.getExtendsClass() != null && !original.getExtendsClass().isEmpty()) {
+                context.append("   Extends: ").append(original.getExtendsClass()).append("\n");
+            }
+            if (original.getImplementsInterfaces() != null && !original.getImplementsInterfaces().isEmpty()) {
+                context.append("   Implements: ").append(String.join(", ", original.getImplementsInterfaces())).append("\n");
+            }
+
             if (original.getMethods() != null && !original.getMethods().isEmpty()) {
                 context.append("   Methods: ");
                 context.append(original.getMethods().stream()

@@ -2,6 +2,7 @@ package com.example.analyzer;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import lombok.extern.java.Log;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * TreeWalker analyzes Java source files to extract structural information.
@@ -37,6 +39,9 @@ public class TreeWalker {
     public static final String METHODS = "methods";
     public static final String CONSTRUCTORS = "constructors";
     public static final String IMPORTS = "imports";
+    public static final String EXTENDS = "extends";
+    public static final String IMPLEMENTS = "implements";
+    public static final String METHOD_SIGNATURES = "methodSignatures";
 
 
     private final Path path;
@@ -72,6 +77,7 @@ public class TreeWalker {
     public Map<String, List<String>> analyzeJavaFile() {
         final Map<String, List<String>> result = new HashMap<>();
         final List<String> methods = new ArrayList<>();
+        final List<String> methodSignatures = new ArrayList<>();
         final List<String> constructors = new ArrayList<>();
         final List<String> imports = new ArrayList<>();
 
@@ -86,13 +92,37 @@ public class TreeWalker {
             cu.getImports().forEach(importDecl ->
                     imports.add(importDecl.getNameAsString()));
 
-            // Get class name
-            cu.getTypes().forEach(type ->
-                    result.put(CLASS_NAME, List.of(type.getNameAsString())));
+            // Get class information including inheritance
+            cu.findAll(ClassOrInterfaceDeclaration.class).forEach(classDecl -> {
+                result.put(CLASS_NAME, List.of(classDecl.getNameAsString()));
+                
+                // Get extends information
+                classDecl.getExtendedTypes().forEach(extendedType ->
+                        result.put(EXTENDS, List.of(extendedType.getNameAsString())));
+                
+                // Get implements information
+                if (!classDecl.getImplementedTypes().isEmpty()) {
+                    List<String> interfaces = classDecl.getImplementedTypes().stream()
+                            .map(impl -> impl.getNameAsString())
+                            .collect(Collectors.toList());
+                    result.put(IMPLEMENTS, interfaces);
+                }
+            });
 
-            // Get method signatures
-            cu.findAll(MethodDeclaration.class).forEach(method ->
-                    methods.add(method.getDeclarationAsString(false, false, false)));
+            // Get method signatures with return types
+            cu.findAll(MethodDeclaration.class).forEach(method -> {
+                methods.add(method.getDeclarationAsString(false, false, false));
+                
+                // Create detailed method signature
+                String returnType = method.getTypeAsString();
+                String methodName = method.getNameAsString();
+                String params = method.getParameters().stream()
+                        .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
+                        .collect(Collectors.joining(", "));
+                
+                String signature = returnType + " " + methodName + "(" + params + ")";
+                methodSignatures.add(signature);
+            });
 
             // Get constructor signatures
             cu.findAll(ConstructorDeclaration.class).forEach(constructor ->
@@ -103,6 +133,9 @@ public class TreeWalker {
             }
             if (!methods.isEmpty()) {
                 result.put(METHODS, methods);
+            }
+            if (!methodSignatures.isEmpty()) {
+                result.put(METHOD_SIGNATURES, methodSignatures);
             }
             if (!constructors.isEmpty()) {
                 result.put(CONSTRUCTORS, constructors);

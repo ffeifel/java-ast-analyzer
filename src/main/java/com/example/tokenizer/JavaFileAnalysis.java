@@ -41,21 +41,21 @@ public class JavaFileAnalysis {
     private List<String> className;
 
     @JsonProperty("extends")
-    private List<String> extends_;
+    private List<String> extendsClasses;
 
     @JsonProperty("implements")
-    private List<String> implements_;
+    private List<String> implementsInterfaces;
 
     @JsonProperty("methodSignatures")
     private List<String> methodSignatures;
 
     // Getter methods for new fields
-    public List<String> getExtends() {
-        return extends_;
+    public List<String> getExtendsClasses() {
+        return extendsClasses;
     }
 
-    public List<String> getImplements() {
-        return implements_;
+    public List<String> getImplementsInterfaces() {
+        return implementsInterfaces;
     }
 
     public List<String> getMethodSignatures() {
