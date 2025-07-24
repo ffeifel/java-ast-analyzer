@@ -1,6 +1,6 @@
 # Code Search Tool
 
-A powerful Java-based tool for intelligent code analysis and semantic search in Git repositories.
+A Java-based tool for intelligent code analysis and semantic search in Git repositories.
 
 ## Overview
 
@@ -55,12 +55,12 @@ When searching for "user authentication", you might see:
 ```
 Relevant code for: "user authentication"
 
-1. UserAuthenticationService.java (Score: 8.5)
+1. UserAuthenticationService.java (Score: 0.85)
    - authenticateUser(String username, String password)
    - validateUserCredentials(UserCredentials credentials)
    - Package: com.example.auth
 
-2. LoginController.java (Score: 6.2)
+2. LoginController.java (Score: 0.62)
    - handleLogin(HttpServletRequest request)
    - Package: com.example.web.controller
 ```
@@ -72,20 +72,6 @@ Relevant code for: "user authentication"
 - **Java 11** or higher
 - **Maven 3.6** or higher
 - **Git** (for repository analysis)
-
-### Quick Start
-
-1. **Clone and build the project:**
-   ```bash
-   git clone <repository-url>
-   cd code-search-tool
-   mvn clean package
-   ```
-
-2. **Run on your project:**
-   ```bash
-   java -jar target/code-search-tool.jar /path/to/your/java/project "search query"
-   ```
 
 ### Build Commands
 
@@ -145,9 +131,6 @@ The tool employs multiple tokenization techniques for maximum search accuracy:
 3. **Relevance Ranking**: Results are sorted by weighted relevance score
 4. **Context Assembly**: Top results are formatted with relevant code snippets
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
 ### Development Setup
 
@@ -164,17 +147,6 @@ mvn test
 mvn exec:java -Dexec.mainClass="com.example.Main"
 ```
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Support
-
-- 📖 **Documentation**: Check the [Wiki](../../wiki) for detailed guides
-- 🐛 **Bug Reports**: Use [GitHub Issues](../../issues)
-- 💬 **Discussions**: Join our [GitHub Discussions](../../discussions)
-- 📧 **Contact**: [your-email@example.com](mailto:your-email@example.com)
-
 ### Relevance Scoring
 
 The tool uses a sophisticated scoring algorithm that weights different code elements:
@@ -187,10 +159,3 @@ The tool uses a sophisticated scoring algorithm that weights different code elem
 | **Import Tokens** | 0.5 | Imports show dependencies and usage patterns |
 
 **Scoring Formula**: `Total Score = Σ(token_overlap × weight)` for each element type
-
-### Performance
-
-- **Analysis Speed**: ~1000 Java files per second
-- **Memory Usage**: Scales linearly with codebase size
-- **Search Speed**: Sub-second response for most queries
-
