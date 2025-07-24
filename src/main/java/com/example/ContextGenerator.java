@@ -25,47 +25,41 @@ public class ContextGenerator {
         }
 
         StringBuilder context = new StringBuilder();
-        context.append("Based on your prompt: \"").append(prompt).append("\"\n\n");
-        context.append("Here are the most relevant code elements from the repository:\n\n");
+        context.append("Relevant code for: \"").append(prompt).append("\"\n\n");
 
         for (int i = 0; i < searchResults.size(); i++) {
             ScoredCodeElement scored = searchResults.get(i);
             TokenizedCodeElement tokenized = scored.codeElement();
             CodeElement original = tokenized.getOriginalCodeElement();
 
-            context.append(String.format("=== Result %d (Relevance: %.2f) ===\n", i + 1, scored.score()));
-
-            if (original.getClassName() != null && !original.getClassName().isEmpty()) {
-                context.append("Class: ").append(original.getClassName()).append("\n");
-            }
-
-            if (original.getPackageName() != null && !original.getPackageName().isEmpty()) {
-                context.append("Package: ").append(original.getPackageName()).append("\n");
-            }
+            context.append(String.format("%d. %s (%.2f) - %s\n", 
+                i + 1, 
+                original.getClassName() != null ? original.getClassName() : "Unknown",
+                scored.score(),
+                original.getPackageName() != null ? original.getPackageName() : ""));
 
             if (original.getMethods() != null && !original.getMethods().isEmpty()) {
-                context.append("Methods:\n");
-                for (CodeElement.Method method : original.getMethods()) {
-                    context.append("  - ").append(method.getName());
-                    if (method.getParameters() != null && !method.getParameters().isEmpty()) {
-                        context.append("(").append(String.join(", ", method.getParameters())).append(")");
-                    }
-                    context.append("\n");
-                }
-            }
-
-            if (original.getImports() != null && !original.getImports().isEmpty()) {
-                context.append("Key Imports: ");
-                context.append(String.join(", ", original.getImports().stream()
-                        .limit(5)
-                        .toList()));
+                context.append("   Methods: ");
+                context.append(original.getMethods().stream()
+                        .limit(8) // Limit to avoid clutter
+                        .map(method -> method.getName() + 
+                            (method.getParameters() != null && !method.getParameters().isEmpty() 
+                                ? "(" + method.getParameters().size() + " params)" 
+                                : "()"))
+                        .reduce((a, b) -> a + ", " + b)
+                        .orElse(""));
                 context.append("\n");
             }
 
+            if (original.getImports() != null && !original.getImports().isEmpty()) {
+                context.append("   Key imports: ");
+                context.append(String.join(", ", original.getImports().stream()
+                        .limit(3) // Reduced from 5 to 3
+                        .toList()));
+                context.append("\n");
+            }
             context.append("\n");
         }
-
-        context.append("Use this context to provide more accurate and relevant responses about the codebase.");
 
         String result = context.toString();
         log.log(Level.INFO, "Generated context with " + searchResults.size() + " code elements");
