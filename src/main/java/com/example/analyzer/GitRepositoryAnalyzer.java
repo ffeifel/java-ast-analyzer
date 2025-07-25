@@ -61,14 +61,7 @@ public class GitRepositoryAnalyzer {
     // Cache for file analysis results
     private final Map<String, CachedAnalysis> analysisCache = new ConcurrentHashMap<>();
 
-    private static class CachedAnalysis {
-        final Map<String, List<String>> analysis;
-        final FileTime lastModified;
-
-        CachedAnalysis(final Map<String, List<String>> analysis, final FileTime lastModified) {
-            this.analysis = analysis;
-            this.lastModified = lastModified;
-        }
+    private record CachedAnalysis(Map<String, List<String>> analysis, FileTime lastModified) {
     }
 
     /**
@@ -288,6 +281,14 @@ public class GitRepositoryAnalyzer {
             analysis = walker.analyzeJavaFile();
         }
 
+        final Map<String, Object> fileEntry = getStringObjectMap(root, pathKey, normalizedPath);
+
+        fileEntry.putAll(analysis);
+        return fileEntry;
+    }
+
+    private static Map<String, Object> getStringObjectMap(final Path root, final String pathKey,
+                                                          final Path normalizedPath) {
         final Map<String, Object> fileEntry = new HashMap<>();
         fileEntry.put(FILE_PATH, pathKey);
         fileEntry.put(FILE_NAME, normalizedPath.getFileName().toString());
@@ -300,8 +301,6 @@ public class GitRepositoryAnalyzer {
             // If paths can't be relativized
             fileEntry.put(RELATIVE_PATH, pathKey);
         }
-
-        fileEntry.putAll(analysis);
         return fileEntry;
     }
 

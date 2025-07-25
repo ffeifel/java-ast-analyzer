@@ -156,13 +156,6 @@ public class InvertedIndex {
     }
 
     /**
-     * Gets the vocabulary (all unique tokens)
-     */
-    public Set<String> getVocabulary() {
-        return new HashSet<>(vocabulary);
-    }
-
-    /**
      * Builds a query vector from prompt tokens
      */
     public Map<String, Double> buildQueryVector(final Set<String> promptTokens) {

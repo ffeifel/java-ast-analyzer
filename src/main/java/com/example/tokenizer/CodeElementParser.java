@@ -124,10 +124,8 @@ public class CodeElementParser {
 
         if (parts.length >= 2) {
             returnType = parts[parts.length - 2];
-            methodName = parts[parts.length - 1];
-        } else {
-            methodName = parts[parts.length - 1];
         }
+        methodName = parts[parts.length - 1];
 
         // Parse parameters
         final List<String> parameters = new ArrayList<>();

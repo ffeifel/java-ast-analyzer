@@ -32,11 +32,8 @@ class CodeTokenizerTest {
         @Test
         @DisplayName("Should return empty set for null input")
         void shouldReturnEmptySetForNullInput() {
-            // Given
-            final String input = null;
-
             // When
-            final Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(null);
 
             // Then
             assertNotNull(result);

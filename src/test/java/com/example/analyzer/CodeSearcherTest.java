@@ -373,7 +373,7 @@ class CodeSearcherTest {
             final int maxResults = 10;
 
             // When
-            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+            final List<CodeSearcher.ScoredCodeElement> ignored = codeSearcher.search(promptTokens, codeElements,
                     maxResults);
 
             // Then
@@ -510,10 +510,6 @@ class CodeSearcherTest {
                     .anyMatch(record -> record.getLevel().equals(level) &&
                             record.getMessage().contains(partialMessage));
         }
-
-        public List<LogRecord> getLogRecords() {
-            return new ArrayList<>(logRecords);
-        }
     }
 
     @Nested
@@ -524,7 +520,7 @@ class CodeSearcherTest {
         @DisplayName("Should handle large number of code elements efficiently")
         void shouldHandleLargeNumberOfCodeElementsEfficiently() {
             // Given
-            final List<TokenizedCodeElement> largeCodeElementsList = createLargeCodeElementsList(1000);
+            final List<TokenizedCodeElement> largeCodeElementsList = createLargeCodeElementsList();
             final Set<String> promptTokens = Set.of("test", "method");
             final int maxResults = 10;
 
@@ -708,14 +704,14 @@ class CodeSearcherTest {
 
     // Additional helper methods
 
-    private List<TokenizedCodeElement> createLargeCodeElementsList(final int size) {
+    private List<TokenizedCodeElement> createLargeCodeElementsList() {
         final List<TokenizedCodeElement> elements = new ArrayList<>();
         final Random random = new Random(42); // Fixed seed for reproducible tests
 
         final String[] tokenPool = {"test", "method", "user", "service", "data", "process", "get", "set",
                 "create", "update", "delete", "find", "search", "validate", "format"};
 
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < 1000; i++) {
             final TokenizedCodeElement element = mock(TokenizedCodeElement.class);
             final Set<String> tokens = new HashSet<>();
 

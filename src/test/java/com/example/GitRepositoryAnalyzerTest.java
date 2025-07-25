@@ -1,23 +1,17 @@
 package com.example;
 
 import com.example.analyzer.GitRepositoryAnalyzer;
-import com.example.analyzer.TreeWalker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,9 +22,6 @@ import static org.mockito.Mockito.*;
 class GitRepositoryAnalyzerTest {
 
     private GitRepositoryAnalyzer analyzer;
-
-    @Mock
-    TreeWalker treeWalker;
 
     @TempDir
     Path tempDir;
@@ -88,36 +79,22 @@ class GitRepositoryAnalyzerTest {
         final String javaContent = "package com.test;\n\npublic class TestClass {\n    public void testMethod() {}\n}";
         Files.writeString(javaFile, javaContent);
 
-        // Mock TreeWalker to return predictable results
-        final Map<String, List<String>> mockAnalysis = Map.of(
-                "package", List.of("com.test"),
-                "className", List.of("TestClass"),
-                "methods", List.of("public void testMethod()")
-        );
 
-        try (final MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class, invocation -> {
-            if (invocation.getMethod().getName().equals("isDirectory") &&
-                    invocation.getArgument(0).toString().contains(".git")) {
-                return true;
-            }
-            return invocation.callRealMethod();
-        })) {
-            // When
-            analyzer.parseGitProject(gitRepoDir.toString());
+        // When
+        analyzer.parseGitProject(gitRepoDir.toString());
 
-            // Then
-            final File structureFile = new File(System.getProperty("user.dir"),
-                    gitRepoDir.getFileName().toString() + "_structure.json");
-            final File analysisFile = new File(System.getProperty("user.dir"),
-                    gitRepoDir.getFileName().toString() + "_java_analysis.json");
+        // Then
+        final File structureFile = new File(System.getProperty("user.dir"),
+                gitRepoDir.getFileName().toString() + "_structure.json");
+        final File analysisFile = new File(System.getProperty("user.dir"),
+                gitRepoDir.getFileName().toString() + "_java_analysis.json");
 
-            assertTrue(structureFile.exists(), "Structure file should be created");
-            assertTrue(analysisFile.exists(), "Analysis file should be created");
+        assertTrue(structureFile.exists(), "Structure file should be created");
+        assertTrue(analysisFile.exists(), "Analysis file should be created");
 
-            // Clean up
-            structureFile.delete();
-            analysisFile.delete();
-        }
+        // Clean up
+        structureFile.delete();
+        analysisFile.delete();
     }
 
     @Test
@@ -149,31 +126,23 @@ class GitRepositoryAnalyzerTest {
         final GitRepositoryAnalyzer spyAnalyzer = spy(analyzer);
 
         // When
-        try (final MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class, invocation -> {
-            if (invocation.getMethod().getName().equals("isDirectory")) {
-                Path path = invocation.getArgument(0);
-                return path.toString().contains(".git") ||
-                        path.toString().contains("target") ||
-                        path.equals(gitRepoDir);
-            }
-            return invocation.callRealMethod();
-        })) {
-            spyAnalyzer.parseGitProject(gitRepoDir.toString());
 
-            // Then
-            // Verify that buildSimpleTree returns null for .git and target directories
-            verify(spyAnalyzer, never()).buildSimpleTree(eq(gitDir));
-            verify(spyAnalyzer, never()).buildSimpleTree(eq(targetDir));
+        spyAnalyzer.parseGitProject(gitRepoDir.toString());
 
-            // Clean up
-            final File structureFile = new File(System.getProperty("user.dir"),
-                    gitRepoDir.getFileName().toString() + "_structure.json");
-            final File analysisFile = new File(System.getProperty("user.dir"),
-                    gitRepoDir.getFileName().toString() + "_java_analysis.json");
+        // Then
+        // Verify that buildSimpleTree returns null for .git and target directories
+        verify(spyAnalyzer, never()).buildSimpleTree(eq(gitDir));
+        verify(spyAnalyzer, never()).buildSimpleTree(eq(targetDir));
 
-            if (structureFile.exists()) structureFile.delete();
-            if (analysisFile.exists()) analysisFile.delete();
-        }
+        // Clean up
+        final File structureFile = new File(System.getProperty("user.dir"),
+                gitRepoDir.getFileName().toString() + "_structure.json");
+        final File analysisFile = new File(System.getProperty("user.dir"),
+                gitRepoDir.getFileName().toString() + "_java_analysis.json");
+
+        if (structureFile.exists()) structureFile.delete();
+        if (analysisFile.exists()) analysisFile.delete();
+
     }
 
     @Test
@@ -207,7 +176,7 @@ class GitRepositoryAnalyzerTest {
         assertTrue(content.contains("error"), "Analysis file should contain error information");
 
         // Clean up
-        analysisFile.delete();
+        final boolean ignored = analysisFile.delete();
     }
 
     @Test
@@ -244,6 +213,6 @@ class GitRepositoryAnalyzerTest {
                 "Analysis file should contain the correct relative path");
 
         // Clean up
-        analysisFile.delete();
+        final boolean ignored = analysisFile.delete();
     }
 }

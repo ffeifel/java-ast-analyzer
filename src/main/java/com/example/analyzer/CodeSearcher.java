@@ -20,7 +20,8 @@ public class CodeSearcher {
      * @param maxResults   maximum number of results to return
      * @return list of matching code elements sorted by relevance score
      */
-    public List<ScoredCodeElement> search(final Set<String> promptTokens, final List<TokenizedCodeElement> codeElements, final int maxResults) {
+    public List<ScoredCodeElement> search(final Set<String> promptTokens,
+                                          final List<TokenizedCodeElement> codeElements, final int maxResults) {
 
         if (promptTokens.isEmpty()) {
             log.log(Level.WARNING, "No prompt tokens provided for search");
@@ -47,7 +48,9 @@ public class CodeSearcher {
 
         // Use inverted index to get candidates
         final Set<TokenizedCodeElement> candidates = invertedIndex.getCandidates(promptTokens);
-        log.log(Level.INFO, "Inverted index reduced search space from " + codeElements.size() + " to " + candidates.size() + " candidates");
+        log.log(Level.INFO,
+                "Inverted index reduced search space from " + codeElements.size() + " to " + candidates.size() + " " +
+                        "candidates");
 
         // Use priority queue for early termination
         final PriorityQueue<ScoredCodeElement> topResults = new PriorityQueue<>(
@@ -65,7 +68,7 @@ public class CodeSearcher {
 
                 // Early termination: keep only top maxResults
                 if (topResults.size() > maxResults) {
-                    topResults.poll(); // Remove lowest score
+                    topResults.poll(); // Remove the lowest score
                     // Update threshold to the new minimum
                     if (!topResults.isEmpty()) {
                         minScoreThreshold = Math.max(minScoreThreshold, topResults.peek().score());
@@ -91,7 +94,8 @@ public class CodeSearcher {
      * @param document    the document to compare against
      * @return cosine similarity score (0.0 to 1.0)
      */
-    private double calculateCosineSimilarity(final Map<String, Double> queryVector, final double queryNorm, final TokenizedCodeElement document) {
+    private double calculateCosineSimilarity(final Map<String, Double> queryVector, final double queryNorm,
+                                             final TokenizedCodeElement document) {
         final Map<String, Double> docVector = invertedIndex.getDocumentVector(document);
         final double docNorm = invertedIndex.getDocumentNorm(document);
 
