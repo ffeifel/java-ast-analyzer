@@ -82,6 +82,7 @@
                                     <mainClass>com.example.Main</mainClass>
                                 </transformer>
                             </transformers>
+                            <finalName>code-search-tool</finalName>
                         </configuration>
                     </execution>
                 </executions>
