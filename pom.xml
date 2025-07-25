@@ -82,7 +82,6 @@
                                     <mainClass>com.example.Main</mainClass>
                                 </transformer>
                             </transformers>
-                            <finalName>code-search-tool</finalName>
                         </configuration>
                     </execution>
                 </executions>
@@ -92,15 +91,6 @@
                 <artifactId>native-maven-plugin</artifactId>
                 <version>${native-maven-plugin.version}</version>
                 <extensions>true</extensions>
-                <executions>
-                    <execution>
-                        <id>build-native</id>
-                        <goals>
-                            <goal>compile-no-fork</goal>
-                        </goals>
-                        <phase>package</phase>
-                    </execution>
-                </executions>
                 <configuration>
                     <imageName>code-search-tool</imageName>
                     <mainClass>com.example.Main</mainClass>
