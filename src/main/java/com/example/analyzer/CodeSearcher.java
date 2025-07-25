@@ -5,16 +5,15 @@ import lombok.extern.java.Log;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 @Log
 public class CodeSearcher {
-    
+
     private final InvertedIndex invertedIndex = new InvertedIndex();
     private boolean indexBuilt = false;
 
     /**
-     * Searches for code elements that match the given prompt tokens
+     * Searches for code elements that match the given prompt tokens using vector space model
      *
      * @param promptTokens tokens extracted from the user prompt
      * @param codeElements tokenized code elements to search through
@@ -37,24 +36,33 @@ public class CodeSearcher {
         log.log(Level.FINE, "Searching " + codeElements.size() + " code elements for tokens: " + promptTokens);
         log.info("Searching " + codeElements.size() + " code elements for tokens");
 
+        // Build query vector
+        Map<String, Double> queryVector = invertedIndex.buildQueryVector(promptTokens);
+        double queryNorm = calculateVectorNorm(queryVector);
+
+        if (queryNorm == 0.0) {
+            log.log(Level.WARNING, "Query vector has zero norm - no matching tokens in vocabulary");
+            return List.of();
+        }
+
         // Use inverted index to get candidates
         Set<TokenizedCodeElement> candidates = invertedIndex.getCandidates(promptTokens);
         log.log(Level.INFO, "Inverted index reduced search space from " + codeElements.size() + " to " + candidates.size() + " candidates");
 
         // Use priority queue for early termination
         PriorityQueue<ScoredCodeElement> topResults = new PriorityQueue<>(
-            maxResults + 1, 
-            Comparator.comparingDouble(ScoredCodeElement::score)
+                maxResults + 1,
+                Comparator.comparingDouble(ScoredCodeElement::score)
         );
 
-        double minScoreThreshold = 0.15;
-        
+        double minScoreThreshold = 0.01; // Lower threshold for cosine similarity
+
         for (TokenizedCodeElement element : candidates) {
-            double score = calculateRelevanceScore(promptTokens, element);
-            
+            double score = calculateCosineSimilarity(queryVector, queryNorm, element);
+
             if (score > minScoreThreshold) {
                 topResults.offer(new ScoredCodeElement(element, score));
-                
+
                 // Early termination: keep only top maxResults
                 if (topResults.size() > maxResults) {
                     topResults.poll(); // Remove lowest score
@@ -76,76 +84,41 @@ public class CodeSearcher {
     }
 
     /**
-     * Calculates relevance score between prompt tokens and a code element
-     * Now includes TF-IDF weighting for better relevance
+     * Calculates cosine similarity between query vector and document vector
      *
-     * @param promptTokens tokens from the user prompt
-     * @param codeElement  tokenized code element
-     * @return relevance score (higher = more relevant)
+     * @param queryVector the TF-IDF vector of the query
+     * @param queryNorm   the norm of the query vector
+     * @param document    the document to compare against
+     * @return cosine similarity score (0.0 to 1.0)
      */
-    private double calculateRelevanceScore(Set<String> promptTokens, TokenizedCodeElement codeElement) {
-        double score = 0.0;
+    private double calculateCosineSimilarity(Map<String, Double> queryVector, double queryNorm, TokenizedCodeElement document) {
+        Map<String, Double> docVector = invertedIndex.getDocumentVector(document);
+        double docNorm = invertedIndex.getDocumentNorm(document);
 
-        // Weight different token types differently with TF-IDF
-        score += calculateTfIdfScore(promptTokens, codeElement.getClassTokens()) * 3.0;
-        score += calculateTfIdfScore(promptTokens, codeElement.getMethodTokens()) * 2.0;
-        score += calculateTfIdfScore(promptTokens, codeElement.getPackageTokens()) * 1.0;
-        score += calculateTfIdfScore(promptTokens, codeElement.getImportTokens()) * 0.5;
-
-        return score;
-    }
-    
-    /**
-     * Calculates TF-IDF weighted score for token overlap
-     */
-    private double calculateTfIdfScore(Set<String> promptTokens, Set<String> codeTokens) {
-        if (promptTokens.isEmpty() || codeTokens.isEmpty()) {
+        if (docNorm == 0.0 || queryNorm == 0.0) {
             return 0.0;
         }
 
-        Set<String> intersection = new HashSet<>(promptTokens);
-        intersection.retainAll(codeTokens);
-        
-        if (intersection.isEmpty()) {
-            return 0.0;
+        // Calculate dot product
+        double dotProduct = 0.0;
+        for (Map.Entry<String, Double> entry : queryVector.entrySet()) {
+            String token = entry.getKey();
+            double queryWeight = entry.getValue();
+            double docWeight = docVector.getOrDefault(token, 0.0);
+            dotProduct += queryWeight * docWeight;
         }
 
-        double tfIdfScore = 0.0;
-        for (String token : intersection) {
-            // Term frequency in this context is binary (present or not)
-            double tf = 1.0;
-            // Get inverse document frequency from index
-            double idf = invertedIndex.getTokenIDF(token);
-            tfIdfScore += tf * idf;
-        }
-
-        // Normalize by the size of the union to get a ratio
-        Set<String> union = new HashSet<>(promptTokens);
-        union.addAll(codeTokens);
-        
-        return tfIdfScore / union.size();
+        // Cosine similarity = dot product / (norm1 * norm2)
+        return dotProduct / (queryNorm * docNorm);
     }
 
     /**
-     * Calculates the overlap ratio between two token sets
-     *
-     * @param promptTokens tokens from prompt
-     * @param codeTokens   tokens from code element
-     * @return overlap ratio (0.0 to 1.0)
+     * Calculates the norm (magnitude) of a vector
      */
-    private double calculateTokenOverlap(Set<String> promptTokens, Set<String> codeTokens) {
-        if (promptTokens.isEmpty() || codeTokens.isEmpty()) {
-            return 0.0;
-        }
-
-        Set<String> intersection = new HashSet<>(promptTokens);
-        intersection.retainAll(codeTokens);
-
-        // Return the ratio of matching tokens to total unique tokens
-        Set<String> union = new HashSet<>(promptTokens);
-        union.addAll(codeTokens);
-
-        return (double) intersection.size() / union.size();
+    private double calculateVectorNorm(Map<String, Double> vector) {
+        return Math.sqrt(vector.values().stream()
+                .mapToDouble(value -> value * value)
+                .sum());
     }
 
     /**

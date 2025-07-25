@@ -7,16 +7,16 @@ import java.util.regex.Pattern;
 
 public class CodeTokenizer {
 
-    private static final Pattern SEPARATOR_PATTERN = Pattern.compile("[._|\\-\\s]+");
+    private static final Pattern SEPARATOR_PATTERN = Pattern.compile("[._|\\-\\s$@]+");
     private static final Pattern CAMEL_CASE_PATTERN1 = Pattern.compile("([a-z])([A-Z])");
     private static final Pattern CAMEL_CASE_PATTERN2 = Pattern.compile("([A-Z+])([A-Z][a-z])");
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("([a-zA-Z])([0-9])|([0-9])([a-zA-Z])");
     private static final Pattern SPECIAL_CHARS_PATTERN = Pattern.compile("[^a-zA-Z0-9]+");
-    
+
     // Cache for tokenization results
     private final ConcurrentHashMap<String, Set<String>> tokenCache = new ConcurrentHashMap<>();
-    
+
     // Pre-compiled regex results cache
     private final ConcurrentHashMap<String, String[]> separatorCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> camelCaseCache = new ConcurrentHashMap<>();
@@ -48,8 +48,11 @@ public class CodeTokenizer {
     private void addTokensFromSeparators(String text, Set<String> tokens) {
         String[] parts = separatorCache.computeIfAbsent(text, SEPARATOR_PATTERN::split);
         for (String part : parts) {
-            if (part.length() > 1) {
-                tokens.add(part.toLowerCase());
+            // Clean special characters from each part
+            String cleanPart = SPECIAL_CHARS_PATTERN.matcher(part).replaceAll("");
+            // Only add if it's purely alphabetic and longer than 1 character
+            if (cleanPart.length() > 1 && cleanPart.matches("[a-zA-Z]+")) {
+                tokens.add(cleanPart.toLowerCase());
             }
         }
     }
@@ -62,8 +65,10 @@ public class CodeTokenizer {
 
         String[] parts = WHITESPACE_PATTERN.split(processed);
         for (String part : parts) {
-            if (part.length() > 1) {
-                tokens.add(part.toLowerCase());
+            // Clean special characters from each part
+            String cleanPart = SPECIAL_CHARS_PATTERN.matcher(part).replaceAll("");
+            if (cleanPart.length() > 1) {
+                tokens.add(cleanPart.toLowerCase());
             }
         }
     }
