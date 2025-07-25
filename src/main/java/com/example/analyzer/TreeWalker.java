@@ -5,9 +5,9 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.nodeTypes.NodeWithSimpleName;
 import lombok.extern.java.Log;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +42,6 @@ public class TreeWalker {
     public static final String EXTENDS = "extends";
     public static final String IMPLEMENTS = "implements";
     public static final String METHOD_SIGNATURES = "methodSignatures";
-
 
     private final Path path;
     private final JavaParser parser;
@@ -101,17 +100,17 @@ public class TreeWalker {
             List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
             if (!classes.isEmpty()) {
                 // Get the first class found
-                ClassOrInterfaceDeclaration firstClass = classes.get(0);
+                ClassOrInterfaceDeclaration firstClass = classes.getFirst();
                 result.put(CLASS_NAME, List.of(firstClass.getNameAsString()));
-                
+
                 // Get extends information
                 firstClass.getExtendedTypes().forEach(extendedType ->
                         result.put(EXTENDS, List.of(extendedType.getNameAsString())));
-                
+
                 // Get implements information
                 if (!firstClass.getImplementedTypes().isEmpty()) {
                     List<String> interfaces = firstClass.getImplementedTypes().stream()
-                            .map(impl -> impl.getNameAsString())
+                            .map(NodeWithSimpleName::getNameAsString)
                             .collect(Collectors.toList());
                     result.put(IMPLEMENTS, interfaces);
                 }
@@ -125,10 +124,10 @@ public class TreeWalker {
                 String params = method.getParameters().stream()
                         .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
                         .collect(Collectors.joining(", "));
-                
+
                 String methodSignature = returnType + " " + methodName + "(" + params + ")";
                 methods.add(methodSignature);
-                
+
                 // Create detailed method signature for METHOD_SIGNATURES (same as above for now)
                 methodSignatures.add(methodSignature);
             });
@@ -139,7 +138,7 @@ public class TreeWalker {
                 String params = constructor.getParameters().stream()
                         .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
                         .collect(Collectors.joining(", "));
-                
+
                 String signature = constructorName + "(" + params + ")";
                 constructors.add(signature);
             });
@@ -157,9 +156,6 @@ public class TreeWalker {
                 result.put(CONSTRUCTORS, constructors);
             }
 
-        } catch (IOException e) {
-            log.log(Level.WARNING, "Error parsing Java file: " + path, e);
-            result.put("error", List.of("Failed to parse file: " + e.getMessage()));
         } catch (Exception e) {
             log.log(Level.WARNING, "Error parsing Java file: " + path, e);
             result.put("error", List.of("Failed to parse file: " + e.getMessage()));
