@@ -15,8 +15,8 @@ import java.util.logging.Level;
 @Log
 public class Main {
 
-    public static void main(String[] args) {
-        String gitRepoPath;
+    public static void main(final String[] args) {
+        final String gitRepoPath;
         String prompt = null;
 
         if (args.length > 0) {
@@ -30,7 +30,7 @@ public class Main {
             prompt = args[1];
         }
 
-        GitRepositoryAnalyzer gitProjectToJson = new GitRepositoryAnalyzer();
+        final GitRepositoryAnalyzer gitProjectToJson = new GitRepositoryAnalyzer();
         final String outputDir = gitProjectToJson.parseGitProject(gitRepoPath);
 
         try {
@@ -50,22 +50,22 @@ public class Main {
                 log.log(Level.INFO, "Usage: java -jar app.jar <repo-path> \"<search-prompt>\"");
             }
 
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private static void performSearch(String prompt, List<TokenizedCodeElement> tokenizedElements) {
+    private static void performSearch(final String prompt, final List<TokenizedCodeElement> tokenizedElements) {
         log.log(Level.INFO, "Performing search for prompt: " + prompt);
 
-        PromptAnalyzer promptAnalyzer = new PromptAnalyzer();
-        var promptTokens = promptAnalyzer.analyzePrompt(prompt);
+        final PromptAnalyzer promptAnalyzer = new PromptAnalyzer();
+        final var promptTokens = promptAnalyzer.analyzePrompt(prompt);
 
-        CodeSearcher searcher = new CodeSearcher();
-        var searchResults = searcher.search(promptTokens, tokenizedElements, 10);
+        final CodeSearcher searcher = new CodeSearcher();
+        final var searchResults = searcher.search(promptTokens, tokenizedElements, 10);
 
-        ContextGenerator contextGenerator = new ContextGenerator();
-        String context = contextGenerator.generateContext(prompt, searchResults);
+        final ContextGenerator contextGenerator = new ContextGenerator();
+        final String context = contextGenerator.generateContext(prompt, searchResults);
 
         // Output the context
         System.out.println("\n" + "=".repeat(80));

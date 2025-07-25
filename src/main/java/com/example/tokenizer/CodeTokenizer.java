@@ -21,18 +21,18 @@ public class CodeTokenizer {
     private final ConcurrentHashMap<String, String[]> separatorCache = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, String> camelCaseCache = new ConcurrentHashMap<>();
 
-    public Set<String> tokenize(String text) {
+    public Set<String> tokenize(final String text) {
         if (text == null || text.isEmpty()) {
             return new HashSet<>();
         }
 
         // Check cache first
-        Set<String> cached = tokenCache.get(text);
+        final Set<String> cached = tokenCache.get(text);
         if (cached != null) {
             return new HashSet<>(cached); // Return copy to avoid modification
         }
 
-        Set<String> tokens = new HashSet<>();
+        final Set<String> tokens = new HashSet<>();
 
         addTokensFromSeparators(text, tokens);
         addTokensFromCamelCase(text, tokens);
@@ -45,11 +45,11 @@ public class CodeTokenizer {
         return tokens;
     }
 
-    private void addTokensFromSeparators(String text, Set<String> tokens) {
-        String[] parts = separatorCache.computeIfAbsent(text, SEPARATOR_PATTERN::split);
-        for (String part : parts) {
+    private void addTokensFromSeparators(final String text, final Set<String> tokens) {
+        final String[] parts = separatorCache.computeIfAbsent(text, SEPARATOR_PATTERN::split);
+        for (final String part : parts) {
             // Clean special characters from each part
-            String cleanPart = SPECIAL_CHARS_PATTERN.matcher(part).replaceAll("");
+            final String cleanPart = SPECIAL_CHARS_PATTERN.matcher(part).replaceAll("");
             // Only add if it's purely alphabetic and longer than 1 character
             if (cleanPart.length() > 1 && cleanPart.matches("[a-zA-Z]+")) {
                 tokens.add(cleanPart.toLowerCase());
@@ -57,35 +57,35 @@ public class CodeTokenizer {
         }
     }
 
-    private void addTokensFromCamelCase(String text, Set<String> tokens) {
-        String processed = camelCaseCache.computeIfAbsent(text, t -> {
-            String temp = CAMEL_CASE_PATTERN1.matcher(t).replaceAll("$1 $2");
+    private void addTokensFromCamelCase(final String text, final Set<String> tokens) {
+        final String processed = camelCaseCache.computeIfAbsent(text, t -> {
+            final String temp = CAMEL_CASE_PATTERN1.matcher(t).replaceAll("$1 $2");
             return CAMEL_CASE_PATTERN2.matcher(temp).replaceAll("$1 $2");
         });
 
-        String[] parts = WHITESPACE_PATTERN.split(processed);
-        for (String part : parts) {
+        final String[] parts = WHITESPACE_PATTERN.split(processed);
+        for (final String part : parts) {
             // Clean special characters from each part
-            String cleanPart = SPECIAL_CHARS_PATTERN.matcher(part).replaceAll("");
+            final String cleanPart = SPECIAL_CHARS_PATTERN.matcher(part).replaceAll("");
             if (cleanPart.length() > 1) {
                 tokens.add(cleanPart.toLowerCase());
             }
         }
     }
 
-    private void addTokensFromNumericSeparation(String text, Set<String> tokens) {
-        String processed = NUMERIC_PATTERN.matcher(text).replaceAll("$1$3 $2$4");
-        String[] parts = WHITESPACE_PATTERN.split(processed);
-        for (String part : parts) {
+    private void addTokensFromNumericSeparation(final String text, final Set<String> tokens) {
+        final String processed = NUMERIC_PATTERN.matcher(text).replaceAll("$1$3 $2$4");
+        final String[] parts = WHITESPACE_PATTERN.split(processed);
+        for (final String part : parts) {
             if (part.length() > 1 && !part.matches("\\d+")) {
                 tokens.add(part.toLowerCase());
             }
         }
     }
 
-    private void addTokensFromAcronyms(String text, Set<String> tokens) {
-        StringBuilder currentAcronym = new StringBuilder();
-        for (char c : text.toCharArray()) {
+    private void addTokensFromAcronyms(final String text, final Set<String> tokens) {
+        final StringBuilder currentAcronym = new StringBuilder();
+        for (final char c : text.toCharArray()) {
             if (Character.isUpperCase(c)) {
                 currentAcronym.append(c);
             } else {
@@ -100,13 +100,13 @@ public class CodeTokenizer {
         }
     }
 
-    private void addSubstrings(String text, Set<String> tokens) {
-        String cleanText = SPECIAL_CHARS_PATTERN.matcher(text).replaceAll("");
+    private void addSubstrings(final String text, final Set<String> tokens) {
+        final String cleanText = SPECIAL_CHARS_PATTERN.matcher(text).replaceAll("");
         if (cleanText.length() < 3) return;
 
         for (int len = 3; len <= Math.min(6, cleanText.length()); len++) {
             for (int i = 0; i <= cleanText.length() - len; i++) {
-                String substring = cleanText.substring(i, i + len).toLowerCase();
+                final String substring = cleanText.substring(i, i + len).toLowerCase();
                 if (substring.matches("[a-z]+")) {
                     tokens.add(substring);
                 }

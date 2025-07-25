@@ -20,7 +20,7 @@ public class CodeSearcher {
      * @param maxResults   maximum number of results to return
      * @return list of matching code elements sorted by relevance score
      */
-    public List<ScoredCodeElement> search(Set<String> promptTokens, List<TokenizedCodeElement> codeElements, int maxResults) {
+    public List<ScoredCodeElement> search(final Set<String> promptTokens, final List<TokenizedCodeElement> codeElements, final int maxResults) {
 
         if (promptTokens.isEmpty()) {
             log.log(Level.WARNING, "No prompt tokens provided for search");
@@ -37,8 +37,8 @@ public class CodeSearcher {
         log.info("Searching " + codeElements.size() + " code elements for tokens");
 
         // Build query vector
-        Map<String, Double> queryVector = invertedIndex.buildQueryVector(promptTokens);
-        double queryNorm = calculateVectorNorm(queryVector);
+        final Map<String, Double> queryVector = invertedIndex.buildQueryVector(promptTokens);
+        final double queryNorm = calculateVectorNorm(queryVector);
 
         if (queryNorm == 0.0) {
             log.log(Level.WARNING, "Query vector has zero norm - no matching tokens in vocabulary");
@@ -46,19 +46,19 @@ public class CodeSearcher {
         }
 
         // Use inverted index to get candidates
-        Set<TokenizedCodeElement> candidates = invertedIndex.getCandidates(promptTokens);
+        final Set<TokenizedCodeElement> candidates = invertedIndex.getCandidates(promptTokens);
         log.log(Level.INFO, "Inverted index reduced search space from " + codeElements.size() + " to " + candidates.size() + " candidates");
 
         // Use priority queue for early termination
-        PriorityQueue<ScoredCodeElement> topResults = new PriorityQueue<>(
+        final PriorityQueue<ScoredCodeElement> topResults = new PriorityQueue<>(
                 maxResults + 1,
                 Comparator.comparingDouble(ScoredCodeElement::score)
         );
 
         double minScoreThreshold = 0.01; // Lower threshold for cosine similarity
 
-        for (TokenizedCodeElement element : candidates) {
-            double score = calculateCosineSimilarity(queryVector, queryNorm, element);
+        for (final TokenizedCodeElement element : candidates) {
+            final double score = calculateCosineSimilarity(queryVector, queryNorm, element);
 
             if (score > minScoreThreshold) {
                 topResults.offer(new ScoredCodeElement(element, score));
@@ -75,7 +75,7 @@ public class CodeSearcher {
         }
 
         // Convert to list and sort in descending order
-        List<ScoredCodeElement> scoredElements = new ArrayList<>(topResults);
+        final List<ScoredCodeElement> scoredElements = new ArrayList<>(topResults);
         scoredElements.sort((a, b) -> Double.compare(b.score(), a.score()));
 
         log.log(Level.INFO, "Found " + scoredElements.size() + " matching elements");
@@ -91,9 +91,9 @@ public class CodeSearcher {
      * @param document    the document to compare against
      * @return cosine similarity score (0.0 to 1.0)
      */
-    private double calculateCosineSimilarity(Map<String, Double> queryVector, double queryNorm, TokenizedCodeElement document) {
-        Map<String, Double> docVector = invertedIndex.getDocumentVector(document);
-        double docNorm = invertedIndex.getDocumentNorm(document);
+    private double calculateCosineSimilarity(final Map<String, Double> queryVector, final double queryNorm, final TokenizedCodeElement document) {
+        final Map<String, Double> docVector = invertedIndex.getDocumentVector(document);
+        final double docNorm = invertedIndex.getDocumentNorm(document);
 
         if (docNorm == 0.0 || queryNorm == 0.0) {
             return 0.0;
@@ -101,10 +101,10 @@ public class CodeSearcher {
 
         // Calculate dot product
         double dotProduct = 0.0;
-        for (Map.Entry<String, Double> entry : queryVector.entrySet()) {
-            String token = entry.getKey();
-            double queryWeight = entry.getValue();
-            double docWeight = docVector.getOrDefault(token, 0.0);
+        for (final Map.Entry<String, Double> entry : queryVector.entrySet()) {
+            final String token = entry.getKey();
+            final double queryWeight = entry.getValue();
+            final double docWeight = docVector.getOrDefault(token, 0.0);
             dotProduct += queryWeight * docWeight;
         }
 
@@ -115,7 +115,7 @@ public class CodeSearcher {
     /**
      * Calculates the norm (magnitude) of a vector
      */
-    private double calculateVectorNorm(Map<String, Double> vector) {
+    private double calculateVectorNorm(final Map<String, Double> vector) {
         return Math.sqrt(vector.values().stream()
                 .mapToDouble(value -> value * value)
                 .sum());

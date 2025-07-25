@@ -16,7 +16,7 @@ public class TokenizedCodeElement {
     private final Set<String> importTokens;
     private final Set<String> allTokens;
 
-    public TokenizedCodeElement(CodeElement codeElement, CodeTokenizer tokenizer) {
+    public TokenizedCodeElement(final CodeElement codeElement, final CodeTokenizer tokenizer) {
         this.originalCodeElement = codeElement;
 
         this.classTokens = tokenizer.tokenize(codeElement.getClassName());
@@ -35,8 +35,8 @@ public class TokenizedCodeElement {
         this.allTokens.addAll(importTokens);
     }
 
-    private String getLastPartOfImport(String importStmt) {
-        String[] parts = importStmt.split("\\.");
+    private String getLastPartOfImport(final String importStmt) {
+        final String[] parts = importStmt.split("\\.");
         return parts.length > 0 ? parts[parts.length - 1] : importStmt;
     }
 

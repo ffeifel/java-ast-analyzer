@@ -44,11 +44,11 @@ class GitRepositoryAnalyzerTest {
     @DisplayName("Should skip processing when directory is not a Git repository")
     void shouldSkipProcessingWhenNotGitRepo() throws IOException {
         // Given
-        Path nonGitDir = tempDir.resolve("non-git-project");
+        final Path nonGitDir = tempDir.resolve("non-git-project");
         Files.createDirectories(nonGitDir);
 
         // Create a test file
-        Path testFile = nonGitDir.resolve("Test.java");
+        final Path testFile = nonGitDir.resolve("Test.java");
         Files.writeString(testFile, "public class Test {}");
 
         // When
@@ -56,9 +56,9 @@ class GitRepositoryAnalyzerTest {
 
         // Then
         // We can't directly assert the internal state, but we can verify no files were created
-        File structureFile = new File(System.getProperty("user.dir"),
+        final File structureFile = new File(System.getProperty("user.dir"),
                 nonGitDir.getFileName().toString() + "_structure.json");
-        File analysisFile = new File(System.getProperty("user.dir"),
+        final File analysisFile = new File(System.getProperty("user.dir"),
                 nonGitDir.getFileName().toString() + "_java_analysis.json");
 
         assertFalse(structureFile.exists(), "Structure file should not be created for non-git repo");
@@ -70,32 +70,32 @@ class GitRepositoryAnalyzerTest {
     void shouldProcessGitRepositoryAndGenerateJsonFiles() throws IOException {
         // Given
         // Create a mock Git repository structure
-        Path gitRepoDir = tempDir.resolve("git-project");
+        final Path gitRepoDir = tempDir.resolve("git-project");
         Files.createDirectories(gitRepoDir);
 
         // Create .git directory to make it a valid Git repo
-        Path gitDir = gitRepoDir.resolve(".git");
+        final Path gitDir = gitRepoDir.resolve(".git");
         Files.createDirectories(gitDir);
 
         // Create a source directory with Java files
-        Path srcDir = gitRepoDir.resolve("src");
-        Path mainDir = srcDir.resolve("main");
-        Path javaDir = mainDir.resolve("java");
+        final Path srcDir = gitRepoDir.resolve("src");
+        final Path mainDir = srcDir.resolve("main");
+        final Path javaDir = mainDir.resolve("java");
         Files.createDirectories(javaDir);
 
         // Create a Java file
-        Path javaFile = javaDir.resolve("TestClass.java");
-        String javaContent = "package com.test;\n\npublic class TestClass {\n    public void testMethod() {}\n}";
+        final Path javaFile = javaDir.resolve("TestClass.java");
+        final String javaContent = "package com.test;\n\npublic class TestClass {\n    public void testMethod() {}\n}";
         Files.writeString(javaFile, javaContent);
 
         // Mock TreeWalker to return predictable results
-        Map<String, List<String>> mockAnalysis = Map.of(
+        final Map<String, List<String>> mockAnalysis = Map.of(
                 "package", List.of("com.test"),
                 "className", List.of("TestClass"),
                 "methods", List.of("public void testMethod()")
         );
 
-        try (MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class, invocation -> {
+        try (final MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class, invocation -> {
             if (invocation.getMethod().getName().equals("isDirectory") &&
                     invocation.getArgument(0).toString().contains(".git")) {
                 return true;
@@ -106,9 +106,9 @@ class GitRepositoryAnalyzerTest {
             analyzer.parseGitProject(gitRepoDir.toString());
 
             // Then
-            File structureFile = new File(System.getProperty("user.dir"),
+            final File structureFile = new File(System.getProperty("user.dir"),
                     gitRepoDir.getFileName().toString() + "_structure.json");
-            File analysisFile = new File(System.getProperty("user.dir"),
+            final File analysisFile = new File(System.getProperty("user.dir"),
                     gitRepoDir.getFileName().toString() + "_java_analysis.json");
 
             assertTrue(structureFile.exists(), "Structure file should be created");
@@ -125,31 +125,31 @@ class GitRepositoryAnalyzerTest {
     void shouldSkipGitAndTargetDirectories() throws IOException {
         // Given
         // Create a mock Git repository with .git and target directories
-        Path gitRepoDir = tempDir.resolve("skip-test-repo");
+        final Path gitRepoDir = tempDir.resolve("skip-test-repo");
         Files.createDirectories(gitRepoDir);
 
         // Create .git directory
-        Path gitDir = gitRepoDir.resolve(".git");
+        final Path gitDir = gitRepoDir.resolve(".git");
         Files.createDirectories(gitDir);
-        Path gitFile = gitDir.resolve("config");
+        final Path gitFile = gitDir.resolve("config");
         Files.writeString(gitFile, "# Git config");
 
         // Create target directory
-        Path targetDir = gitRepoDir.resolve("target");
+        final Path targetDir = gitRepoDir.resolve("target");
         Files.createDirectories(targetDir);
-        Path targetFile = targetDir.resolve("TestClass.class");
+        final Path targetFile = targetDir.resolve("TestClass.class");
         Files.writeString(targetFile, "compiled bytecode");
 
         // Create a source file
-        Path srcFile = gitRepoDir.resolve("TestClass.java");
-        String javaContent = "public class TestClass {}";
+        final Path srcFile = gitRepoDir.resolve("TestClass.java");
+        final String javaContent = "public class TestClass {}";
         Files.writeString(srcFile, javaContent);
 
         // Use a spy to verify internal method calls
-        GitRepositoryAnalyzer spyAnalyzer = spy(analyzer);
+        final GitRepositoryAnalyzer spyAnalyzer = spy(analyzer);
 
         // When
-        try (MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class, invocation -> {
+        try (final MockedStatic<Files> mockedFiles = Mockito.mockStatic(Files.class, invocation -> {
             if (invocation.getMethod().getName().equals("isDirectory")) {
                 Path path = invocation.getArgument(0);
                 return path.toString().contains(".git") ||
@@ -166,9 +166,9 @@ class GitRepositoryAnalyzerTest {
             verify(spyAnalyzer, never()).buildSimpleTree(eq(targetDir));
 
             // Clean up
-            File structureFile = new File(System.getProperty("user.dir"),
+            final File structureFile = new File(System.getProperty("user.dir"),
                     gitRepoDir.getFileName().toString() + "_structure.json");
-            File analysisFile = new File(System.getProperty("user.dir"),
+            final File analysisFile = new File(System.getProperty("user.dir"),
                     gitRepoDir.getFileName().toString() + "_java_analysis.json");
 
             if (structureFile.exists()) structureFile.delete();
@@ -181,29 +181,29 @@ class GitRepositoryAnalyzerTest {
     void shouldHandleErrorsDuringJavaFileAnalysis() throws IOException {
         // Given
         // Create a mock Git repository with a problematic Java file
-        Path gitRepoDir = tempDir.resolve("error-test-repo");
+        final Path gitRepoDir = tempDir.resolve("error-test-repo");
         Files.createDirectories(gitRepoDir);
 
         // Create .git directory
-        Path gitDir = gitRepoDir.resolve(".git");
+        final Path gitDir = gitRepoDir.resolve(".git");
         Files.createDirectories(gitDir);
 
         // Create a Java file that will cause analysis error
-        Path javaFile = gitRepoDir.resolve("ErrorClass.java");
-        String invalidJavaContent = "This is not valid Java code";
+        final Path javaFile = gitRepoDir.resolve("ErrorClass.java");
+        final String invalidJavaContent = "This is not valid Java code";
         Files.writeString(javaFile, invalidJavaContent);
 
         // When
         analyzer.parseGitProject(gitRepoDir.toString());
 
         // Then
-        File analysisFile = new File(System.getProperty("user.dir"),
+        final File analysisFile = new File(System.getProperty("user.dir"),
                 gitRepoDir.getFileName().toString() + "_java_analysis.json");
 
         assertTrue(analysisFile.exists(), "Analysis file should be created even with errors");
 
         // Read the file to verify it contains error information
-        String content = Files.readString(analysisFile.toPath());
+        final String content = Files.readString(analysisFile.toPath());
         assertTrue(content.contains("error"), "Analysis file should contain error information");
 
         // Clean up
@@ -215,30 +215,30 @@ class GitRepositoryAnalyzerTest {
     void shouldCorrectlyRelativizeFilePaths() throws IOException {
         // Given
         // Create a mock Git repository with nested structure
-        Path gitRepoDir = tempDir.resolve("path-test-repo");
+        final Path gitRepoDir = tempDir.resolve("path-test-repo");
         Files.createDirectories(gitRepoDir);
 
         // Create .git directory
-        Path gitDir = gitRepoDir.resolve(".git");
+        final Path gitDir = gitRepoDir.resolve(".git");
         Files.createDirectories(gitDir);
 
         // Create nested directories with a Java file
-        Path nestedDir = gitRepoDir.resolve("src/main/java/com/example");
+        final Path nestedDir = gitRepoDir.resolve("src/main/java/com/example");
         Files.createDirectories(nestedDir);
-        Path javaFile = nestedDir.resolve("TestClass.java");
+        final Path javaFile = nestedDir.resolve("TestClass.java");
         Files.writeString(javaFile, "package com.example; public class TestClass {}");
 
         // When
         analyzer.parseGitProject(gitRepoDir.toString());
 
         // Then
-        File analysisFile = new File(System.getProperty("user.dir"),
+        final File analysisFile = new File(System.getProperty("user.dir"),
                 gitRepoDir.getFileName().toString() + "_java_analysis.json");
 
         assertTrue(analysisFile.exists(), "Analysis file should be created");
 
         // Read the file to verify it contains the correct relative path
-        String content = Files.readString(analysisFile.toPath());
+        final String content = Files.readString(analysisFile.toPath());
         assertTrue(content.contains("relativePath"), "Analysis file should contain relativePath");
         assertTrue(content.contains("src/main/java/com/example/TestClass.java"),
                 "Analysis file should contain the correct relative path");

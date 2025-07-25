@@ -36,7 +36,7 @@ class CodeSearcherTest {
 
         // Set up test log handler
         testLogHandler = new TestLogHandler();
-        Logger logger = Logger.getLogger(CodeSearcher.class.getName());
+        final Logger logger = Logger.getLogger(CodeSearcher.class.getName());
         logger.addHandler(testLogHandler);
         logger.setLevel(Level.ALL);
     }
@@ -49,11 +49,12 @@ class CodeSearcherTest {
         @DisplayName("Should return empty list when prompt tokens are empty")
         void shouldReturnEmptyListWhenPromptTokensAreEmpty() {
             // Given
-            Set<String> emptyPromptTokens = Collections.emptySet();
-            int maxResults = 10;
+            final Set<String> emptyPromptTokens = Collections.emptySet();
+            final int maxResults = 10;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(emptyPromptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(emptyPromptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertTrue(result.isEmpty());
@@ -64,12 +65,13 @@ class CodeSearcherTest {
         @DisplayName("Should return empty list when code elements are empty")
         void shouldReturnEmptyListWhenCodeElementsAreEmpty() {
             // Given
-            Set<String> promptTokens = Set.of("test", "method");
-            List<TokenizedCodeElement> emptyCodeElements = Collections.emptyList();
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("test", "method");
+            final List<TokenizedCodeElement> emptyCodeElements = Collections.emptyList();
+            final int maxResults = 10;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, emptyCodeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, emptyCodeElements,
+                    maxResults);
 
             // Then
             assertTrue(result.isEmpty());
@@ -79,12 +81,12 @@ class CodeSearcherTest {
         @DisplayName("Should build index on first search")
         void shouldBuildIndexOnFirstSearch() {
             // Given
-            Set<String> promptTokens = Set.of("test", "method");
-            int maxResults = 10;
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex(false); // Index NOT built
+            final Set<String> promptTokens = Set.of("test", "method");
+            final int maxResults = 10;
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex(false); // Index NOT built
 
             // Mock the necessary methods
-            Map<String, Double> queryVector = Map.of("test", 0.5, "method", 0.5);
+            final Map<String, Double> queryVector = Map.of("test", 0.5, "method", 0.5);
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(queryVector);
             when(mockInvertedIndex.getCandidates(promptTokens)).thenReturn(Collections.emptySet());
 
@@ -99,12 +101,12 @@ class CodeSearcherTest {
         @DisplayName("Should not rebuild index on subsequent searches")
         void shouldNotRebuildIndexOnSubsequentSearches() {
             // Given
-            Set<String> promptTokens = Set.of("test", "method");
-            int maxResults = 10;
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex(false); // Index NOT built initially
+            final Set<String> promptTokens = Set.of("test", "method");
+            final int maxResults = 10;
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex(false); // Index NOT built initially
 
             // Mock the necessary methods
-            Map<String, Double> queryVector = Map.of("test", 0.5, "method", 0.5);
+            final Map<String, Double> queryVector = Map.of("test", 0.5, "method", 0.5);
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(queryVector);
             when(mockInvertedIndex.getCandidates(promptTokens)).thenReturn(Collections.emptySet());
 
@@ -121,17 +123,17 @@ class CodeSearcherTest {
             return createCodeSearcherWithMockIndex(true); // Index already built
         }
 
-        private CodeSearcher createCodeSearcherWithMockIndex(boolean indexAlreadyBuilt) {
-            CodeSearcher searcher = new CodeSearcher();
+        private CodeSearcher createCodeSearcherWithMockIndex(final boolean indexAlreadyBuilt) {
+            final CodeSearcher searcher = new CodeSearcher();
             try {
-                java.lang.reflect.Field indexField = CodeSearcher.class.getDeclaredField("invertedIndex");
+                final java.lang.reflect.Field indexField = CodeSearcher.class.getDeclaredField("invertedIndex");
                 indexField.setAccessible(true);
                 indexField.set(searcher, mockInvertedIndex);
 
-                java.lang.reflect.Field indexBuiltField = CodeSearcher.class.getDeclaredField("indexBuilt");
+                final java.lang.reflect.Field indexBuiltField = CodeSearcher.class.getDeclaredField("indexBuilt");
                 indexBuiltField.setAccessible(true);
                 indexBuiltField.set(searcher, indexAlreadyBuilt);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 throw new RuntimeException("Failed to inject mock inverted index", e);
             }
             return searcher;
@@ -141,24 +143,24 @@ class CodeSearcherTest {
         @DisplayName("Should return results sorted by score in descending order")
         void shouldReturnResultsSortedByScoreInDescendingOrder() {
             // Given
-            Set<String> promptTokens = Set.of("user", "service");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("user", "service");
+            final int maxResults = 10;
 
             // Use CodeSearcher with mocked InvertedIndex
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
 
             // Create multiple elements with different scores
-            TokenizedCodeElement element1 = codeElements.get(0);
-            TokenizedCodeElement element2 = codeElements.get(1);
-            TokenizedCodeElement element3 = codeElements.get(2);
+            final TokenizedCodeElement element1 = codeElements.get(0);
+            final TokenizedCodeElement element2 = codeElements.get(1);
+            final TokenizedCodeElement element3 = codeElements.get(2);
 
             // Mock the inverted index behavior
-            Map<String, Double> queryVector = Map.of("user", 0.5, "service", 0.5);
+            final Map<String, Double> queryVector = Map.of("user", 0.5, "service", 0.5);
 
             // Mock different document vectors to create different scores
-            Map<String, Double> docVector1 = Map.of("user", 0.9, "service", 0.8); // High score
-            Map<String, Double> docVector2 = Map.of("user", 0.6, "service", 0.5); // Medium score
-            Map<String, Double> docVector3 = Map.of("user", 0.3, "service", 0.2); // Low score
+            final Map<String, Double> docVector1 = Map.of("user", 0.9, "service", 0.8); // High score
+            final Map<String, Double> docVector2 = Map.of("user", 0.6, "service", 0.5); // Medium score
+            final Map<String, Double> docVector3 = Map.of("user", 0.3, "service", 0.2); // Low score
 
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(queryVector);
             when(mockInvertedIndex.getCandidates(promptTokens)).thenReturn(Set.of(element1, element2, element3));
@@ -174,7 +176,8 @@ class CodeSearcherTest {
             when(mockInvertedIndex.getDocumentNorm(element3)).thenReturn(Math.sqrt(0.3 * 0.3 + 0.2 * 0.2));
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertFalse(result.isEmpty());
@@ -188,11 +191,12 @@ class CodeSearcherTest {
         @DisplayName("Should respect max results limit")
         void shouldRespectMaxResultsLimit() {
             // Given
-            Set<String> promptTokens = Set.of("test", "method", "user");
-            int maxResults = 2;
+            final Set<String> promptTokens = Set.of("test", "method", "user");
+            final int maxResults = 2;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertTrue(result.size() <= maxResults);
@@ -202,14 +206,15 @@ class CodeSearcherTest {
         @DisplayName("Should return empty list when query vector has zero norm")
         void shouldReturnEmptyListWhenQueryVectorHasZeroNorm() {
             // Given
-            Set<String> promptTokens = Set.of("nonexistent", "tokens");
-            int maxResults = 10;
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
+            final Set<String> promptTokens = Set.of("nonexistent", "tokens");
+            final int maxResults = 10;
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
 
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(Collections.emptyMap());
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertTrue(result.isEmpty());
@@ -220,15 +225,16 @@ class CodeSearcherTest {
         @DisplayName("Should filter results by minimum score threshold")
         void shouldFilterResultsByMinimumScoreThreshold() {
             // Given
-            Set<String> promptTokens = Set.of("very", "specific", "nonmatching", "tokens");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("very", "specific", "nonmatching", "tokens");
+            final int maxResults = 10;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             // All returned results should have score > 0.01 (minimum threshold)
-            for (CodeSearcher.ScoredCodeElement scoredElement : result) {
+            for (final CodeSearcher.ScoredCodeElement scoredElement : result) {
                 assertTrue(scoredElement.score() > 0.01);
             }
         }
@@ -242,12 +248,12 @@ class CodeSearcherTest {
         @DisplayName("Should calculate cosine similarity correctly with mock inverted index")
         void shouldCalculateCosineSimilarityCorrectlyWithMockInvertedIndex() {
             // Given
-            Set<String> promptTokens = Set.of("test", "method");
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
-            TokenizedCodeElement element = codeElements.getFirst();
+            final Set<String> promptTokens = Set.of("test", "method");
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
+            final TokenizedCodeElement element = codeElements.getFirst();
 
-            Map<String, Double> queryVector = Map.of("test", 0.5, "method", 0.5);
-            Map<String, Double> docVector = Map.of("test", 0.3, "method", 0.7);
+            final Map<String, Double> queryVector = Map.of("test", 0.5, "method", 0.5);
+            final Map<String, Double> docVector = Map.of("test", 0.3, "method", 0.7);
 
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(queryVector);
             when(mockInvertedIndex.getCandidates(promptTokens)).thenReturn(Set.of(element));
@@ -255,7 +261,7 @@ class CodeSearcherTest {
             when(mockInvertedIndex.getDocumentNorm(element)).thenReturn(Math.sqrt(0.3 * 0.3 + 0.7 * 0.7));
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, 10);
+            final List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, 10);
 
             // Then
             assertFalse(result.isEmpty());
@@ -267,12 +273,12 @@ class CodeSearcherTest {
         @DisplayName("Should return zero similarity when document norm is zero")
         void shouldReturnZeroSimilarityWhenDocumentNormIsZero() {
             // Given
-            Set<String> promptTokens = Set.of("test");
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
-            TokenizedCodeElement element = codeElements.getFirst();
+            final Set<String> promptTokens = Set.of("test");
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
+            final TokenizedCodeElement element = codeElements.getFirst();
 
-            Map<String, Double> queryVector = Map.of("test", 1.0);
-            Map<String, Double> docVector = Map.of("test", 0.0);
+            final Map<String, Double> queryVector = Map.of("test", 1.0);
+            final Map<String, Double> docVector = Map.of("test", 0.0);
 
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(queryVector);
             when(mockInvertedIndex.getCandidates(promptTokens)).thenReturn(Set.of(element));
@@ -280,7 +286,7 @@ class CodeSearcherTest {
             when(mockInvertedIndex.getDocumentNorm(element)).thenReturn(0.0);
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, 10);
+            final List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, 10);
 
             // Then
             assertTrue(result.isEmpty()); // Should be filtered out due to zero similarity
@@ -295,20 +301,20 @@ class CodeSearcherTest {
         @DisplayName("Should find relevant code elements for user-related search")
         void shouldFindRelevantCodeElementsForUserRelatedSearch() {
             // Given
-            Set<String> promptTokens = Set.of("user", "get", "name");
-            int maxResults = 5;
+            final Set<String> promptTokens = Set.of("user", "get", "name");
+            final int maxResults = 5;
 
             // Use CodeSearcher with mocked InvertedIndex
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
-            TokenizedCodeElement userElement = codeElements.get(0); // userService has "user", "name"
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
+            final TokenizedCodeElement userElement = codeElements.getFirst(); // userService has "user", "name"
 
             // Mock the inverted index behavior
-            Map<String, Double> queryVector = Map.of(
+            final Map<String, Double> queryVector = Map.of(
                     "user", 0.6,
                     "get", 0.5,
                     "name", 0.7
             );
-            Map<String, Double> docVector = Map.of(
+            final Map<String, Double> docVector = Map.of(
                     "user", 0.8,
                     "name", 0.9,
                     "get", 0.4
@@ -320,13 +326,14 @@ class CodeSearcherTest {
             when(mockInvertedIndex.getDocumentNorm(userElement)).thenReturn(Math.sqrt(0.8 * 0.8 + 0.9 * 0.9 + 0.4 * 0.4));
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertFalse(result.isEmpty());
 
             // Check that results contain user-related elements
-            boolean foundUserRelated = result.stream()
+            final boolean foundUserRelated = result.stream()
                     .anyMatch(scored -> scored.codeElement().getAllTokens().contains("user") ||
                             scored.codeElement().getAllTokens().contains("name"));
             assertTrue(foundUserRelated, "Should find user-related code elements");
@@ -336,18 +343,19 @@ class CodeSearcherTest {
         @DisplayName("Should handle service-related search gracefully")
         void shouldHandleServiceRelatedSearchGracefully() {
             // Given
-            Set<String> promptTokens = Set.of("service", "process", "data");
-            int maxResults = 5;
+            final Set<String> promptTokens = Set.of("service", "process", "data");
+            final int maxResults = 5;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertNotNull(result);
             assertTrue(result.size() <= maxResults);
 
             // If results are found, they should be properly formatted
-            for (CodeSearcher.ScoredCodeElement scoredElement : result) {
+            for (final CodeSearcher.ScoredCodeElement scoredElement : result) {
                 assertNotNull(scoredElement.codeElement());
                 assertTrue(scoredElement.score() >= 0.0);
                 assertTrue(scoredElement.score() <= 1.0);
@@ -361,11 +369,12 @@ class CodeSearcherTest {
         @DisplayName("Should handle search with single token")
         void shouldHandleSearchWithSingleToken() {
             // Given
-            Set<String> promptTokens = Set.of("method");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("method");
+            final int maxResults = 10;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertDoesNotThrow(() -> codeSearcher.search(promptTokens, codeElements, maxResults));
@@ -376,11 +385,13 @@ class CodeSearcherTest {
         @DisplayName("Should handle search with many tokens")
         void shouldHandleSearchWithManyTokens() {
             // Given
-            Set<String> promptTokens = Set.of("user", "service", "method", "get", "set", "process", "data", "name", "id", "value");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("user", "service", "method", "get", "set", "process", "data",
+                    "name", "id", "value");
+            final int maxResults = 10;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertDoesNotThrow(() -> codeSearcher.search(promptTokens, codeElements, maxResults));
@@ -396,11 +407,11 @@ class CodeSearcherTest {
         @DisplayName("Should create ScoredCodeElement with correct values")
         void shouldCreateScoredCodeElementWithCorrectValues() {
             // Given
-            TokenizedCodeElement element = codeElements.getFirst();
-            double score = 0.85;
+            final TokenizedCodeElement element = codeElements.getFirst();
+            final double score = 0.85;
 
             // When
-            CodeSearcher.ScoredCodeElement scoredElement = new CodeSearcher.ScoredCodeElement(element, score);
+            final CodeSearcher.ScoredCodeElement scoredElement = new CodeSearcher.ScoredCodeElement(element, score);
 
             // Then
             assertEquals(element, scoredElement.codeElement());
@@ -411,12 +422,12 @@ class CodeSearcherTest {
         @DisplayName("Should support equality comparison")
         void shouldSupportEqualityComparison() {
             // Given
-            TokenizedCodeElement element = codeElements.getFirst();
-            double score = 0.85;
+            final TokenizedCodeElement element = codeElements.getFirst();
+            final double score = 0.85;
 
             // When
-            CodeSearcher.ScoredCodeElement scoredElement1 = new CodeSearcher.ScoredCodeElement(element, score);
-            CodeSearcher.ScoredCodeElement scoredElement2 = new CodeSearcher.ScoredCodeElement(element, score);
+            final CodeSearcher.ScoredCodeElement scoredElement1 = new CodeSearcher.ScoredCodeElement(element, score);
+            final CodeSearcher.ScoredCodeElement scoredElement2 = new CodeSearcher.ScoredCodeElement(element, score);
 
             // Then
             assertEquals(scoredElement1, scoredElement2);
@@ -427,27 +438,30 @@ class CodeSearcherTest {
     // Helper methods
 
     private List<TokenizedCodeElement> createTestCodeElements() {
-        List<TokenizedCodeElement> elements = new ArrayList<>();
+        final List<TokenizedCodeElement> elements = new ArrayList<>();
 
         // Create mock tokenized code elements with different token sets
-        TokenizedCodeElement userService = mock(TokenizedCodeElement.class);
+        final TokenizedCodeElement userService = mock(TokenizedCodeElement.class);
         lenient().when(userService.getAllTokens()).thenReturn(Set.of("user", "service", "get", "name", "id"));
         elements.add(userService);
 
-        TokenizedCodeElement dataProcessor = mock(TokenizedCodeElement.class);
-        lenient().when(dataProcessor.getAllTokens()).thenReturn(Set.of("data", "processor", "process", "method", "value"));
+        final TokenizedCodeElement dataProcessor = mock(TokenizedCodeElement.class);
+        lenient().when(dataProcessor.getAllTokens()).thenReturn(Set.of("data", "processor", "process", "method",
+                "value"));
         elements.add(dataProcessor);
 
-        TokenizedCodeElement testHelper = mock(TokenizedCodeElement.class);
+        final TokenizedCodeElement testHelper = mock(TokenizedCodeElement.class);
         lenient().when(testHelper.getAllTokens()).thenReturn(Set.of("test", "helper", "method", "assert", "verify"));
         elements.add(testHelper);
 
-        TokenizedCodeElement configManager = mock(TokenizedCodeElement.class);
-        lenient().when(configManager.getAllTokens()).thenReturn(Set.of("config", "manager", "property", "setting", "value"));
+        final TokenizedCodeElement configManager = mock(TokenizedCodeElement.class);
+        lenient().when(configManager.getAllTokens()).thenReturn(Set.of("config", "manager", "property", "setting",
+                "value"));
         elements.add(configManager);
 
-        TokenizedCodeElement utilityClass = mock(TokenizedCodeElement.class);
-        lenient().when(utilityClass.getAllTokens()).thenReturn(Set.of("utility", "helper", "format", "string", "convert"));
+        final TokenizedCodeElement utilityClass = mock(TokenizedCodeElement.class);
+        lenient().when(utilityClass.getAllTokens()).thenReturn(Set.of("utility", "helper", "format", "string",
+                "convert"));
         elements.add(utilityClass);
 
         return elements;
@@ -455,16 +469,16 @@ class CodeSearcherTest {
 
     private CodeSearcher createCodeSearcherWithMockIndex() {
         // Use reflection to inject mock inverted index for testing
-        CodeSearcher searcher = new CodeSearcher();
+        final CodeSearcher searcher = new CodeSearcher();
         try {
-            java.lang.reflect.Field indexField = CodeSearcher.class.getDeclaredField("invertedIndex");
+            final java.lang.reflect.Field indexField = CodeSearcher.class.getDeclaredField("invertedIndex");
             indexField.setAccessible(true);
             indexField.set(searcher, mockInvertedIndex);
 
-            java.lang.reflect.Field indexBuiltField = CodeSearcher.class.getDeclaredField("indexBuilt");
+            final java.lang.reflect.Field indexBuiltField = CodeSearcher.class.getDeclaredField("indexBuilt");
             indexBuiltField.setAccessible(true);
             indexBuiltField.set(searcher, true);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             throw new RuntimeException("Failed to inject mock inverted index", e);
         }
         return searcher;
@@ -477,7 +491,7 @@ class CodeSearcherTest {
         private final List<LogRecord> logRecords = new ArrayList<>();
 
         @Override
-        public void publish(LogRecord record) {
+        public void publish(final LogRecord record) {
             logRecords.add(record);
         }
 
@@ -491,7 +505,7 @@ class CodeSearcherTest {
             logRecords.clear();
         }
 
-        public boolean hasLogMessage(Level level, String partialMessage) {
+        public boolean hasLogMessage(final Level level, final String partialMessage) {
             return logRecords.stream()
                     .anyMatch(record -> record.getLevel().equals(level) &&
                             record.getMessage().contains(partialMessage));
@@ -510,14 +524,15 @@ class CodeSearcherTest {
         @DisplayName("Should handle large number of code elements efficiently")
         void shouldHandleLargeNumberOfCodeElementsEfficiently() {
             // Given
-            List<TokenizedCodeElement> largeCodeElementsList = createLargeCodeElementsList(1000);
-            Set<String> promptTokens = Set.of("test", "method");
-            int maxResults = 10;
+            final List<TokenizedCodeElement> largeCodeElementsList = createLargeCodeElementsList(1000);
+            final Set<String> promptTokens = Set.of("test", "method");
+            final int maxResults = 10;
 
             // When
-            long startTime = System.currentTimeMillis();
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, largeCodeElementsList, maxResults);
-            long endTime = System.currentTimeMillis();
+            final long startTime = System.currentTimeMillis();
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens,
+                    largeCodeElementsList, maxResults);
+            final long endTime = System.currentTimeMillis();
 
             // Then
             assertTrue(endTime - startTime < 5000, "Search should complete within 5 seconds for 1000 elements");
@@ -528,11 +543,12 @@ class CodeSearcherTest {
         @DisplayName("Should handle zero max results")
         void shouldHandleZeroMaxResults() {
             // Given
-            Set<String> promptTokens = Set.of("user", "service");
-            int maxResults = 0;
+            final Set<String> promptTokens = Set.of("user", "service");
+            final int maxResults = 0;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertTrue(result.isEmpty());
@@ -542,12 +558,13 @@ class CodeSearcherTest {
         @DisplayName("Should handle negative max results")
         void shouldHandleNegativeMaxResults() {
             // Given
-            Set<String> promptTokens = Set.of("user", "service");
-            int maxResults = -1;
+            final Set<String> promptTokens = Set.of("user", "service");
+            final int maxResults = -1;
 
             // When & Then
             assertDoesNotThrow(() -> {
-                List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+                final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                        maxResults);
                 assertTrue(result.isEmpty());
             });
         }
@@ -556,9 +573,9 @@ class CodeSearcherTest {
         @DisplayName("Should handle very long token strings")
         void shouldHandleVeryLongTokenStrings() {
             // Given
-            String longToken = "a".repeat(1000);
-            Set<String> promptTokens = Set.of(longToken, "method");
-            int maxResults = 10;
+            final String longToken = "a".repeat(1000);
+            final Set<String> promptTokens = Set.of(longToken, "method");
+            final int maxResults = 10;
 
             // When & Then
             assertDoesNotThrow(() -> {
@@ -570,8 +587,8 @@ class CodeSearcherTest {
         @DisplayName("Should handle special characters in tokens")
         void shouldHandleSpecialCharactersInTokens() {
             // Given
-            Set<String> promptTokens = Set.of("user@domain.com", "method$name", "class#property");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("user@domain.com", "method$name", "class#property");
+            final int maxResults = 10;
 
             // When & Then
             assertDoesNotThrow(() -> {
@@ -583,12 +600,14 @@ class CodeSearcherTest {
         @DisplayName("Should maintain consistent results across multiple searches")
         void shouldMaintainConsistentResultsAcrossMultipleSearches() {
             // Given
-            Set<String> promptTokens = Set.of("user", "service");
-            int maxResults = 5;
+            final Set<String> promptTokens = Set.of("user", "service");
+            final int maxResults = 5;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result1 = codeSearcher.search(promptTokens, codeElements, maxResults);
-            List<CodeSearcher.ScoredCodeElement> result2 = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result1 = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result2 = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             assertEquals(result1.size(), result2.size());
@@ -607,13 +626,13 @@ class CodeSearcherTest {
         @DisplayName("Should handle empty vector norm calculation")
         void shouldHandleEmptyVectorNormCalculation() {
             // Given
-            Set<String> promptTokens = Set.of("nonexistent");
-            CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
+            final Set<String> promptTokens = Set.of("nonexistent");
+            final CodeSearcher searcherWithMock = createCodeSearcherWithMockIndex();
 
             when(mockInvertedIndex.buildQueryVector(promptTokens)).thenReturn(Collections.emptyMap());
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, 10);
+            final List<CodeSearcher.ScoredCodeElement> result = searcherWithMock.search(promptTokens, codeElements, 10);
 
             // Then
             assertTrue(result.isEmpty());
@@ -628,12 +647,13 @@ class CodeSearcherTest {
         @DisplayName("Should use priority queue for efficient top-k selection")
         void shouldUsePriorityQueueForEfficientTopKSelection() {
             // Given
-            Set<String> promptTokens = Set.of("common", "token");
-            List<TokenizedCodeElement> manyElements = createManyElementsWithVaryingScores();
-            int maxResults = 3;
+            final Set<String> promptTokens = Set.of("common", "token");
+            final List<TokenizedCodeElement> manyElements = createManyElementsWithVaryingScores();
+            final int maxResults = 3;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, manyElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, manyElements,
+                    maxResults);
 
             // Then
             assertTrue(result.size() <= maxResults);
@@ -647,15 +667,16 @@ class CodeSearcherTest {
         @DisplayName("Should apply minimum score threshold correctly")
         void shouldApplyMinimumScoreThresholdCorrectly() {
             // Given
-            Set<String> promptTokens = Set.of("rare", "token");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("rare", "token");
+            final int maxResults = 10;
 
             // When
-            List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements, maxResults);
+            final List<CodeSearcher.ScoredCodeElement> result = codeSearcher.search(promptTokens, codeElements,
+                    maxResults);
 
             // Then
             // All results should have score > 0.01 (the minimum threshold)
-            for (CodeSearcher.ScoredCodeElement scoredElement : result) {
+            for (final CodeSearcher.ScoredCodeElement scoredElement : result) {
                 assertTrue(scoredElement.score() > 0.01,
                         "Score " + scoredElement.score() + " should be above minimum threshold");
             }
@@ -670,8 +691,8 @@ class CodeSearcherTest {
         @DisplayName("Should log fine-grained search details")
         void shouldLogFineGrainedSearchDetails() {
             // Given
-            Set<String> promptTokens = Set.of("user", "service");
-            int maxResults = 10;
+            final Set<String> promptTokens = Set.of("user", "service");
+            final int maxResults = 10;
 
             // Set logger to FINE level to capture detailed logs
             Logger.getLogger(CodeSearcher.class.getName()).setLevel(Level.FINE);
@@ -680,25 +701,26 @@ class CodeSearcherTest {
             codeSearcher.search(promptTokens, codeElements, maxResults);
 
             // Then
-            assertTrue(testLogHandler.hasLogMessage(Level.FINE, "Searching " + codeElements.size() + " code elements for tokens:"));
+            assertTrue(testLogHandler.hasLogMessage(Level.FINE, "Searching " + codeElements.size() + " code elements " +
+                    "for tokens:"));
         }
     }
 
     // Additional helper methods
 
-    private List<TokenizedCodeElement> createLargeCodeElementsList(int size) {
-        List<TokenizedCodeElement> elements = new ArrayList<>();
-        Random random = new Random(42); // Fixed seed for reproducible tests
+    private List<TokenizedCodeElement> createLargeCodeElementsList(final int size) {
+        final List<TokenizedCodeElement> elements = new ArrayList<>();
+        final Random random = new Random(42); // Fixed seed for reproducible tests
 
-        String[] tokenPool = {"test", "method", "user", "service", "data", "process", "get", "set",
+        final String[] tokenPool = {"test", "method", "user", "service", "data", "process", "get", "set",
                 "create", "update", "delete", "find", "search", "validate", "format"};
 
         for (int i = 0; i < size; i++) {
-            TokenizedCodeElement element = mock(TokenizedCodeElement.class);
-            Set<String> tokens = new HashSet<>();
+            final TokenizedCodeElement element = mock(TokenizedCodeElement.class);
+            final Set<String> tokens = new HashSet<>();
 
             // Add 3-7 random tokens to each element
-            int tokenCount = 3 + random.nextInt(5);
+            final int tokenCount = 3 + random.nextInt(5);
             for (int j = 0; j < tokenCount; j++) {
                 tokens.add(tokenPool[random.nextInt(tokenPool.length)]);
             }
@@ -711,10 +733,10 @@ class CodeSearcherTest {
     }
 
     private List<TokenizedCodeElement> createManyElementsWithVaryingScores() {
-        List<TokenizedCodeElement> elements = new ArrayList<>();
+        final List<TokenizedCodeElement> elements = new ArrayList<>();
 
         // Create elements with different token overlaps to generate varying scores
-        String[] tokenSets = {
+        final String[] tokenSets = {
                 "common,token,high,score",
                 "common,token,medium",
                 "common,different,low",
@@ -722,9 +744,9 @@ class CodeSearcherTest {
                 "completely,different,tokens"
         };
 
-        for (String tokenSetStr : tokenSets) {
-            TokenizedCodeElement element = mock(TokenizedCodeElement.class);
-            Set<String> tokens = Set.of(tokenSetStr.split(","));
+        for (final String tokenSetStr : tokenSets) {
+            final TokenizedCodeElement element = mock(TokenizedCodeElement.class);
+            final Set<String> tokens = Set.of(tokenSetStr.split(","));
             lenient().when(element.getAllTokens()).thenReturn(tokens);
             elements.add(element);
         }

@@ -21,7 +21,7 @@ public class PromptAnalyzer {
      * @param prompt the user's search prompt
      * @return set of tokens extracted from the prompt
      */
-    public Set<String> analyzePrompt(String prompt) {
+    public Set<String> analyzePrompt(final String prompt) {
         if (prompt == null || prompt.trim().isEmpty()) {
             log.log(Level.WARNING, "Empty or null prompt provided");
             return Set.of();
@@ -30,7 +30,7 @@ public class PromptAnalyzer {
         log.log(Level.INFO, "Analyzing prompt: " + prompt);
 
         // Tokenize the prompt using the same tokenizer as code elements
-        Set<String> tokens = tokenizer.tokenize(prompt);
+        final Set<String> tokens = tokenizer.tokenize(prompt);
 
         log.info("Tokens extracted.");
         log.log(Level.FINE, "Extracted tokens: " + tokens);

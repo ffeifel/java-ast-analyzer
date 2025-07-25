@@ -57,15 +57,15 @@ public class GitRepositoryAnalyzer {
     private static final String RELATIVE_PATH = "relativePath";
 
     private final List<Path> javaFilePaths = new ArrayList<>();
-    
+
     // Cache for file analysis results
     private final Map<String, CachedAnalysis> analysisCache = new ConcurrentHashMap<>();
-    
+
     private static class CachedAnalysis {
         final Map<String, List<String>> analysis;
         final FileTime lastModified;
-        
-        CachedAnalysis(Map<String, List<String>> analysis, FileTime lastModified) {
+
+        CachedAnalysis(final Map<String, List<String>> analysis, final FileTime lastModified) {
             this.analysis = analysis;
             this.lastModified = lastModified;
         }
@@ -117,7 +117,7 @@ public class GitRepositoryAnalyzer {
             mapper.writeValueAsString(structure);
             mapper.writeValue(structureFile, structure);
             log.log(Level.INFO, "Project structure written to " + structureFile.getAbsolutePath());
-        } catch (IOException e) {
+        } catch (final IOException e) {
             throw new RuntimeException(e);
         }
 
@@ -156,8 +156,8 @@ public class GitRepositoryAnalyzer {
         final Map<String, Object> result = new HashMap<>();
         final List<String> files = new ArrayList<>();
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
-            for (Path entry : stream) {
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
+            for (final Path entry : stream) {
                 final String entryName = entry.getFileName().toString();
 
                 // Skip .git and target directories
@@ -180,7 +180,7 @@ public class GitRepositoryAnalyzer {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.log(Level.WARNING, "Error reading directory: " + path, e);
         }
 
@@ -210,12 +210,12 @@ public class GitRepositoryAnalyzer {
     private String generateJavaFilesAnalysis(final Path root, final String repoName, final String outputDir) {
         final List<Map<String, Object>> javaFilesAnalysis = new ArrayList<>();
 
-        for (Path javaFilePath : javaFilePaths) {
+        for (final Path javaFilePath : javaFilePaths) {
 
             try {
                 final Map<String, Object> fileEntry = getStringObjectMap(root, javaFilePath);
                 javaFilesAnalysis.add(fileEntry);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 log.log(Level.WARNING, "Error analyzing Java file: " + javaFilePath, e);
 
                 // Add error entry with normalized path
@@ -236,7 +236,7 @@ public class GitRepositoryAnalyzer {
             mapper.writeValue(analysisFile, javaFilesAnalysis);
             log.log(Level.INFO, "Java files analysis written to " + analysisFile.getAbsolutePath());
             return analysisFile.getAbsolutePath();
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.log(Level.SEVERE, "Error writing Java files analysis", e);
             return null;
         }
@@ -263,11 +263,11 @@ public class GitRepositoryAnalyzer {
         final String pathKey = normalizedPath.toString();
 
         Map<String, List<String>> analysis;
-        
+
         try {
-            FileTime currentModified = Files.getLastModifiedTime(normalizedPath);
-            CachedAnalysis cached = analysisCache.get(pathKey);
-            
+            final FileTime currentModified = Files.getLastModifiedTime(normalizedPath);
+            final CachedAnalysis cached = analysisCache.get(pathKey);
+
             // Check if we have a valid cached result
             if (cached != null && cached.lastModified.equals(currentModified)) {
                 log.log(Level.FINE, "Using cached analysis for: " + pathKey);
@@ -277,11 +277,11 @@ public class GitRepositoryAnalyzer {
                 log.log(Level.FINE, "Analyzing file: " + pathKey);
                 final TreeWalker walker = new TreeWalker(pathKey);
                 analysis = walker.analyzeJavaFile();
-                
+
                 // Cache the result
                 analysisCache.put(pathKey, new CachedAnalysis(analysis, currentModified));
             }
-        } catch (IOException e) {
+        } catch (final IOException e) {
             log.log(Level.WARNING, "Error getting file modification time for: " + pathKey, e);
             // Fallback to direct analysis without caching
             final TreeWalker walker = new TreeWalker(pathKey);
@@ -296,7 +296,7 @@ public class GitRepositoryAnalyzer {
         try {
             final Path relativePath = root.relativize(normalizedPath);
             fileEntry.put(RELATIVE_PATH, relativePath.toString());
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             // If paths can't be relativized
             fileEntry.put(RELATIVE_PATH, pathKey);
         }

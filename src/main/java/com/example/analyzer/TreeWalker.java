@@ -51,7 +51,7 @@ public class TreeWalker {
      *
      * @param path The file path to the Java source file to be analyzed
      */
-    public TreeWalker(String path) {
+    public TreeWalker(final String path) {
         parser = new JavaParser();
         this.path = Path.of(path).toAbsolutePath().normalize();
     }
@@ -97,10 +97,10 @@ public class TreeWalker {
             });
 
             // Get class information including inheritance
-            List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
+            final List<ClassOrInterfaceDeclaration> classes = cu.findAll(ClassOrInterfaceDeclaration.class);
             if (!classes.isEmpty()) {
                 // Get the first class found
-                ClassOrInterfaceDeclaration firstClass = classes.getFirst();
+                final ClassOrInterfaceDeclaration firstClass = classes.getFirst();
                 result.put(CLASS_NAME, List.of(firstClass.getNameAsString()));
 
                 // Get extends information
@@ -109,7 +109,7 @@ public class TreeWalker {
 
                 // Get implements information
                 if (!firstClass.getImplementedTypes().isEmpty()) {
-                    List<String> interfaces = firstClass.getImplementedTypes().stream()
+                    final List<String> interfaces = firstClass.getImplementedTypes().stream()
                             .map(NodeWithSimpleName::getNameAsString)
                             .collect(Collectors.toList());
                     result.put(IMPLEMENTS, interfaces);
@@ -119,13 +119,13 @@ public class TreeWalker {
             // Get method signatures with return types
             cu.findAll(MethodDeclaration.class).forEach(method -> {
                 // Create method signature with parameter names for METHODS
-                String returnType = method.getTypeAsString();
-                String methodName = method.getNameAsString();
-                String params = method.getParameters().stream()
+                final String returnType = method.getTypeAsString();
+                final String methodName = method.getNameAsString();
+                final String params = method.getParameters().stream()
                         .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
                         .collect(Collectors.joining(", "));
 
-                String methodSignature = returnType + " " + methodName + "(" + params + ")";
+                final String methodSignature = returnType + " " + methodName + "(" + params + ")";
                 methods.add(methodSignature);
 
                 // Create detailed method signature for METHOD_SIGNATURES (same as above for now)
@@ -134,12 +134,12 @@ public class TreeWalker {
 
             // Get constructor signatures
             cu.findAll(ConstructorDeclaration.class).forEach(constructor -> {
-                String constructorName = constructor.getNameAsString();
-                String params = constructor.getParameters().stream()
+                final String constructorName = constructor.getNameAsString();
+                final String params = constructor.getParameters().stream()
                         .map(param -> param.getTypeAsString() + " " + param.getNameAsString())
                         .collect(Collectors.joining(", "));
 
-                String signature = constructorName + "(" + params + ")";
+                final String signature = constructorName + "(" + params + ")";
                 constructors.add(signature);
             });
 
@@ -156,7 +156,7 @@ public class TreeWalker {
                 result.put(CONSTRUCTORS, constructors);
             }
 
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.log(Level.WARNING, "Error parsing Java file: " + path, e);
             result.put("error", List.of("Failed to parse file: " + e.getMessage()));
         }

@@ -18,19 +18,19 @@ public class ContextGenerator {
      * @param searchResults list of scored code elements
      * @return formatted context string for LLM
      */
-    public String generateContext(String prompt, List<ScoredCodeElement> searchResults) {
+    public String generateContext(final String prompt, final List<ScoredCodeElement> searchResults) {
         if (searchResults.isEmpty()) {
             log.log(Level.INFO, "No search results to generate context from");
             return "No relevant code elements found for the given prompt.";
         }
 
-        StringBuilder context = new StringBuilder();
+        final StringBuilder context = new StringBuilder();
         context.append("Relevant code for: \"").append(prompt).append("\"\n\n");
 
         for (int i = 0; i < searchResults.size(); i++) {
-            ScoredCodeElement scored = searchResults.get(i);
-            TokenizedCodeElement tokenized = scored.codeElement();
-            CodeElement original = tokenized.getOriginalCodeElement();
+            final ScoredCodeElement scored = searchResults.get(i);
+            final TokenizedCodeElement tokenized = scored.codeElement();
+            final CodeElement original = tokenized.getOriginalCodeElement();
 
             // Class header with file path
             context.append(String.format("%d. %s (%.2f)\n",
@@ -83,7 +83,7 @@ public class ContextGenerator {
             context.append("\n");
         }
 
-        String result = context.toString();
+        final String result = context.toString();
         log.log(Level.INFO, "Generated context with " + searchResults.size() + " code elements");
 
         return result;

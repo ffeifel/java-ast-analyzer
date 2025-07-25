@@ -21,7 +21,8 @@ public class CodeElement {
     private String extendsClass;
     private List<String> implementsInterfaces;
 
-    public CodeElement(String className, List<Method> methods, String packageName, List<String> imports) {
+    public CodeElement(final String className, final List<Method> methods, final String packageName,
+                       final List<String> imports) {
         this.className = className;
         this.methods = methods;
         this.packageName = packageName;
@@ -41,12 +42,12 @@ public class CodeElement {
         private String returnType;
         private List<String> parameters;
 
-        public Method(String name) {
+        public Method(final String name) {
             this.name = name;
             this.parameters = new ArrayList<>();
         }
 
-        public Method(String name, String returnType, List<String> parameters) {
+        public Method(final String name, final String returnType, final List<String> parameters) {
             this.name = name;
             this.returnType = returnType;
             this.parameters = parameters;

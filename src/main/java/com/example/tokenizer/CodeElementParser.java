@@ -23,9 +23,9 @@ public class CodeElementParser {
      * @return a list of CodeElement objects
      * @throws IOException if there's an error reading or parsing the file
      */
-    public static List<CodeElement> parseFromJson(String jsonFilePath) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        List<JavaFileAnalysis> dtoList = objectMapper.readValue(
+    public static List<CodeElement> parseFromJson(final String jsonFilePath) throws IOException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final List<JavaFileAnalysis> dtoList = objectMapper.readValue(
                 new File(jsonFilePath),
                 new TypeReference<>() {
                 }
@@ -42,8 +42,8 @@ public class CodeElementParser {
      * @param dto the DTO to convert
      * @return a CodeElement object
      */
-    private static CodeElement convertToCodeElement(JavaFileAnalysis dto) {
-        CodeElement codeElement = new CodeElement();
+    private static CodeElement convertToCodeElement(final JavaFileAnalysis dto) {
+        final CodeElement codeElement = new CodeElement();
 
         // Set class name (take the first one if it's a list)
         if (dto.getClassName() != null && !dto.getClassName().isEmpty()) {
@@ -70,23 +70,23 @@ public class CodeElementParser {
         }
 
         // Set methods
-        List<CodeElement.Method> methods = new ArrayList<>();
+        final List<CodeElement.Method> methods = new ArrayList<>();
 
         // Add regular methods with detailed signatures if available
         if (dto.getMethodSignatures() != null) {
-            for (String methodSignature : dto.getMethodSignatures()) {
+            for (final String methodSignature : dto.getMethodSignatures()) {
                 methods.add(parseMethodSignature(methodSignature));
             }
         } else if (dto.getMethods() != null) {
             // Fallback to simple method names
-            for (String methodSignature : dto.getMethods()) {
+            for (final String methodSignature : dto.getMethods()) {
                 methods.add(new CodeElement.Method(extractMethodName(methodSignature)));
             }
         }
 
         // Add constructors as methods too
         if (dto.getConstructors() != null) {
-            for (String constructorSignature : dto.getConstructors()) {
+            for (final String constructorSignature : dto.getConstructors()) {
                 methods.add(new CodeElement.Method(extractMethodName(constructorSignature)));
             }
         }
@@ -102,24 +102,24 @@ public class CodeElementParser {
      * @param methodSignature the method signature like "String getName(int id, boolean active)"
      * @return a Method object with return type, name, and parameters
      */
-    private static CodeElement.Method parseMethodSignature(String methodSignature) {
+    private static CodeElement.Method parseMethodSignature(final String methodSignature) {
         // Parse signature like "String getName(int id, boolean active)"
-        int openParenIndex = methodSignature.indexOf('(');
-        int closeParenIndex = methodSignature.lastIndexOf(')');
+        final int openParenIndex = methodSignature.indexOf('(');
+        final int closeParenIndex = methodSignature.lastIndexOf(')');
 
         if (openParenIndex == -1) {
             return new CodeElement.Method(methodSignature); // Fallback
         }
 
-        String beforeParams = methodSignature.substring(0, openParenIndex).trim();
+        final String beforeParams = methodSignature.substring(0, openParenIndex).trim();
         String paramsPart = "";
         if (closeParenIndex > openParenIndex) {
             paramsPart = methodSignature.substring(openParenIndex + 1, closeParenIndex).trim();
         }
 
         // Extract return type and method name
-        String[] parts = beforeParams.split("\\s+");
-        String methodName;
+        final String[] parts = beforeParams.split("\\s+");
+        final String methodName;
         String returnType = "void";
 
         if (parts.length >= 2) {
@@ -130,10 +130,10 @@ public class CodeElementParser {
         }
 
         // Parse parameters
-        List<String> parameters = new ArrayList<>();
+        final List<String> parameters = new ArrayList<>();
         if (!paramsPart.isEmpty()) {
-            String[] paramArray = paramsPart.split(",");
-            for (String param : paramArray) {
+            final String[] paramArray = paramsPart.split(",");
+            for (final String param : paramArray) {
                 parameters.add(param.trim());
             }
         }
@@ -147,15 +147,15 @@ public class CodeElementParser {
      * @param methodSignature the method signature
      * @return the method name
      */
-    private static String extractMethodName(String methodSignature) {
+    private static String extractMethodName(final String methodSignature) {
         // Extract method name from signature like "void parseGitProject(String)"
-        int openParenIndex = methodSignature.indexOf('(');
+        final int openParenIndex = methodSignature.indexOf('(');
         if (openParenIndex == -1) {
             return methodSignature; // No parameters
         }
 
-        String beforeParams = methodSignature.substring(0, openParenIndex).trim();
-        int lastSpaceIndex = beforeParams.lastIndexOf(' ');
+        final String beforeParams = methodSignature.substring(0, openParenIndex).trim();
+        final int lastSpaceIndex = beforeParams.lastIndexOf(' ');
 
         if (lastSpaceIndex == -1) {
             return beforeParams; // No return type (probably a constructor)

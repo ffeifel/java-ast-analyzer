@@ -33,10 +33,10 @@ class CodeTokenizerTest {
         @DisplayName("Should return empty set for null input")
         void shouldReturnEmptySetForNullInput() {
             // Given
-            String input = null;
+            final String input = null;
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertNotNull(result);
@@ -47,10 +47,10 @@ class CodeTokenizerTest {
         @DisplayName("Should return empty set for empty string")
         void shouldReturnEmptySetForEmptyString() {
             // Given
-            String input = "";
+            final String input = "";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertNotNull(result);
@@ -61,10 +61,10 @@ class CodeTokenizerTest {
         @DisplayName("Should return empty set for single character")
         void shouldReturnEmptySetForSingleCharacter() {
             // Given
-            String input = "a";
+            final String input = "a";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertNotNull(result);
@@ -79,11 +79,11 @@ class CodeTokenizerTest {
         @ParameterizedTest
         @ValueSource(strings = {"hello_world", "hello-world", "hello.world", "hello world", "hello|world"})
         @DisplayName("Should tokenize text with various separators")
-        void shouldTokenizeTextWithVariousSeparators(String input) {
+        void shouldTokenizeTextWithVariousSeparators(final String input) {
             // Given - input parameter
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("hello"));
@@ -94,10 +94,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle multiple consecutive separators")
         void shouldHandleMultipleConsecutiveSeparators() {
             // Given
-            String input = "hello___world---test";
+            final String input = "hello___world---test";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("hello"));
@@ -109,10 +109,10 @@ class CodeTokenizerTest {
         @DisplayName("Should ignore single character parts from separators")
         void shouldIgnoreSingleCharacterPartsFromSeparators() {
             // Given
-            String input = "a_hello_b_world_c";
+            final String input = "a_hello_b_world_c";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("hello"));
@@ -131,10 +131,10 @@ class CodeTokenizerTest {
         @DisplayName("Should tokenize simple camelCase")
         void shouldTokenizeSimpleCamelCase() {
             // Given
-            String input = "helloWorld";
+            final String input = "helloWorld";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("hello"));
@@ -145,10 +145,10 @@ class CodeTokenizerTest {
         @DisplayName("Should tokenize PascalCase")
         void shouldTokenizePascalCase() {
             // Given
-            String input = "HelloWorld";
+            final String input = "HelloWorld";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("hello"));
@@ -159,10 +159,10 @@ class CodeTokenizerTest {
         @DisplayName("Should tokenize complex camelCase with multiple words")
         void shouldTokenizeComplexCamelCase() {
             // Given
-            String input = "getUserNameFromDatabase";
+            final String input = "getUserNameFromDatabase";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("get"));
@@ -176,10 +176,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle consecutive uppercase letters")
         void shouldHandleConsecutiveUppercaseLetters() {
             // Given
-            String input = "XMLHttpRequest";
+            final String input = "XMLHttpRequest";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("xml"));
@@ -196,10 +196,10 @@ class CodeTokenizerTest {
         @DisplayName("Should separate letters from numbers")
         void shouldSeparateLettersFromNumbers() {
             // Given
-            String input = "test123method";
+            final String input = "test123method";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("test"));
@@ -210,10 +210,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle numbers at the beginning")
         void shouldHandleNumbersAtBeginning() {
             // Given
-            String input = "123test";
+            final String input = "123test";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("test"));
@@ -223,10 +223,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle numbers at the end")
         void shouldHandleNumbersAtEnd() {
             // Given
-            String input = "test123";
+            final String input = "test123";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("test"));
@@ -236,10 +236,10 @@ class CodeTokenizerTest {
         @DisplayName("Should not include pure numeric tokens")
         void shouldNotIncludePureNumericTokens() {
             // Given
-            String input = "test123method456";
+            final String input = "test123method456";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("test"));
@@ -257,10 +257,10 @@ class CodeTokenizerTest {
         @DisplayName("Should extract acronyms from consecutive uppercase letters")
         void shouldExtractAcronymsFromConsecutiveUppercaseLetters() {
             // Given
-            String input = "XMLHttpRequest";
+            final String input = "XMLHttpRequest";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("xml"));
@@ -270,10 +270,10 @@ class CodeTokenizerTest {
         @DisplayName("Should extract multiple acronyms")
         void shouldExtractMultipleAcronyms() {
             // Given
-            String input = "HTTPSConnectionAPI";
+            final String input = "HTTPSConnectionAPI";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("https"));
@@ -284,10 +284,10 @@ class CodeTokenizerTest {
         @DisplayName("Should not extract single uppercase letters as acronyms")
         void shouldNotExtractSingleUppercaseLettersAsAcronyms() {
             // Given
-            String input = "AhelloBworld";
+            final String input = "AhelloBworld";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertFalse(result.contains("a"));
@@ -298,10 +298,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle acronym at the end")
         void shouldHandleAcronymAtEnd() {
             // Given
-            String input = "connectionAPI";
+            final String input = "connectionAPI";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("api"));
@@ -316,10 +316,10 @@ class CodeTokenizerTest {
         @DisplayName("Should generate substrings of length 3-6")
         void shouldGenerateSubstringsOfLength3To6() {
             // Given
-            String input = "hello";
+            final String input = "hello";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertTrue(result.contains("hel"));
@@ -334,10 +334,10 @@ class CodeTokenizerTest {
         @DisplayName("Should not generate substrings shorter than 3 characters")
         void shouldNotGenerateSubstringsShorterThan3Characters() {
             // Given
-            String input = "hello";
+            final String input = "hello";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertFalse(result.contains("he"));
@@ -350,10 +350,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle text shorter than 3 characters for substrings")
         void shouldHandleTextShorterThan3CharactersForSubstrings() {
             // Given
-            String input = "ab";
+            final String input = "ab";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             // Should not crash and should not generate any substrings
@@ -369,14 +369,14 @@ class CodeTokenizerTest {
         @ParameterizedTest
         @MethodSource("complexInputProvider")
         @DisplayName("Should handle complex real-world examples")
-        void shouldHandleComplexRealWorldExamples(String input, Set<String> expectedTokens) {
+        void shouldHandleComplexRealWorldExamples(final String input, final Set<String> expectedTokens) {
             // Given - input and expected tokens from method source
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
-            for (String expectedToken : expectedTokens) {
+            for (final String expectedToken : expectedTokens) {
                 assertTrue(result.contains(expectedToken),
                         "Expected token '" + expectedToken + "' not found in result: " + result);
             }
@@ -395,10 +395,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle mixed case with special characters")
         void shouldHandleMixedCaseWithSpecialCharacters() {
             // Given
-            String input = "MyClass$InnerClass@Override";
+            final String input = "MyClass$InnerClass@Override";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             // From camelCase processing (after cleaning special chars from each part)
@@ -425,11 +425,11 @@ class CodeTokenizerTest {
         @DisplayName("Should return consistent results for same input")
         void shouldReturnConsistentResultsForSameInput() {
             // Given
-            String input = "testMethod";
+            final String input = "testMethod";
 
             // When
-            Set<String> result1 = tokenizer.tokenize(input);
-            Set<String> result2 = tokenizer.tokenize(input);
+            final Set<String> result1 = tokenizer.tokenize(input);
+            final Set<String> result2 = tokenizer.tokenize(input);
 
             // Then
             assertEquals(result1, result2);
@@ -440,12 +440,12 @@ class CodeTokenizerTest {
         @DisplayName("Should allow modification of returned set without affecting cache")
         void shouldAllowModificationOfReturnedSetWithoutAffectingCache() {
             // Given
-            String input = "testMethod";
+            final String input = "testMethod";
 
             // When
-            Set<String> result1 = tokenizer.tokenize(input);
+            final Set<String> result1 = tokenizer.tokenize(input);
             result1.add("modified");
-            Set<String> result2 = tokenizer.tokenize(input);
+            final Set<String> result2 = tokenizer.tokenize(input);
 
             // Then
             assertFalse(result2.contains("modified"));
@@ -461,10 +461,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle string with only special characters")
         void shouldHandleStringWithOnlySpecialCharacters() {
             // Given
-            String input = "!@#$%^&*()";
+            final String input = "!@#$%^&*()";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertNotNull(result);
@@ -475,10 +475,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle very long strings")
         void shouldHandleVeryLongStrings() {
             // Given
-            String input = "a".repeat(1000);
+            final String input = "a".repeat(1000);
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertNotNull(result);
@@ -489,10 +489,10 @@ class CodeTokenizerTest {
         @DisplayName("Should handle unicode characters")
         void shouldHandleUnicodeCharacters() {
             // Given
-            String input = "test_méthod_ñame";
+            final String input = "test_méthod_ñame";
 
             // When
-            Set<String> result = tokenizer.tokenize(input);
+            final Set<String> result = tokenizer.tokenize(input);
 
             // Then
             assertNotNull(result);
